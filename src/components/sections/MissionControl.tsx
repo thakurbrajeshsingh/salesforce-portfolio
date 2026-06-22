@@ -142,8 +142,7 @@ export default function MissionControl({ content }: { content: PortfolioContent 
                   animate={{ scale: [1, 1.3, 1], opacity: [0.8, 0.3, 0.8] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
-                <span>Brajesh Ai</span>
-                {/* <small>{content.profile.role}</small> */}
+                <span>Brajesh AI</span>
               </motion.div>
               {content.profile.orbitSkills.map((item, index) => (
                 <motion.span

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef } from "react";
 
 interface Message {
   role: "user" | "assistant";
@@ -17,20 +16,16 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
   const [showPlayButton, setShowPlayButton] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const audioContextRef = useRef<AudioContext | null>(null);
 
   const startRecording = async () => {
     try {
-      // Initialize AudioContext on user interaction
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-
+      setError(null);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -49,6 +44,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       setIsRecording(true);
     } catch (error) {
       console.error("Error accessing microphone:", error);
+      setError("Microphone access denied. Please allow microphone access.");
     }
   };
 
@@ -79,6 +75,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       }
     } catch (error) {
       console.error("Error transcribing audio:", error);
+      setError("Failed to transcribe audio. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -105,10 +102,9 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
       const data = await response.json();
 
-      // Speak the response first
+      // Speak the response
       await speakText(data.message);
 
-      // Add message after speaking (for voice-only experience)
       const assistantMessage: Message = {
         role: "assistant",
         content: data.message,
@@ -116,6 +112,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       setMessages([...newMessages, assistantMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
+      setError("Failed to get response. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -136,10 +133,10 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       setPendingAudioUrl(audioUrl);
       setShowPlayButton(false);
 
-      // Try to play automatically
       await playAudio(audioUrl);
     } catch (error) {
-      console.error("Error generating speech:", error);
+      console.error("Error playing speech:", error);
+      setIsSpeaking(false);
     }
   };
 
@@ -153,13 +150,10 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       setPendingAudioUrl(null);
     };
 
-    audio.onerror = (error) => {
-      console.error("Audio playback error:", error);
+    audio.onerror = () => {
       setIsSpeaking(false);
-      setShowPlayButton(true); // Show button if autoplay fails
+      setShowPlayButton(true);
     };
-
-    audio.load();
 
     try {
       await audio.play();
@@ -178,390 +172,192 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="jarvis-interface"
-    >
-      <div className="jarvis-header">
-        <div className="jarvis-title">
-          <motion.div
-            className="jarvis-icon"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              <path d="M2 12h20" />
-            </svg>
-          </motion.div>
-          <span>BRAJESH AI</span>
-        </div>
-        {onClose && (
-          <button onClick={onClose} className="jarvis-close">×</button>
+    <div className="voice-chat-simple">
+      <div className="voice-chat-header">
+        <span>Brajesh AI</span>
+        {onClose && <button onClick={onClose} className="close-btn">×</button>}
+      </div>
+
+      <div className="voice-chat-messages">
+        {error && <div className="error-message">{error}</div>}
+
+        {messages.length === 0 && !error && (
+          <div className="welcome-message">
+            <p>Ask me about Salesforce, Field Service, or my experience.</p>
+          </div>
+        )}
+
+        {messages.map((message, index) => (
+          message.role === "user" && (
+            <div key={index} className="message user">
+              <div className="message-content">{message.content}</div>
+            </div>
+          )
+        ))}
+
+        {isLoading && (
+          <div className="message assistant">
+            <div className="message-content">Processing...</div>
+          </div>
         )}
       </div>
 
-      <div className="jarvis-messages">
-        <AnimatePresence>
-          {messages.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="jarvis-welcome"
-            >
-              <div className="jarvis-status">
-                <motion.span
-                  className="status-dot"
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-                <span>SYSTEM ONLINE</span>
-              </div>
-              <p>Ask me about Salesforce, Field Service, or my experience.</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {messages.map((message, index) => (
-            message.role === "user" && (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="jarvis-message user"
-              >
-                <div className="message-label">YOU</div>
-                <div className="message-text">{message.content}</div>
-              </motion.div>
-            )
-          ))}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {isLoading && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="jarvis-message assistant"
-            >
-              <div className="message-label">AI</div>
-              <div className="message-text processing">
-                <motion.span
-                  animate={{ opacity: [0.3, 1, 0.3] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  Processing...
-                </motion.span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <div className="jarvis-controls">
-        <motion.button
+      <div className="voice-chat-controls">
+        <button
           onClick={isRecording ? stopRecording : startRecording}
           disabled={isLoading || isSpeaking}
-          className={`jarvis-mic ${isRecording ? "recording" : ""}`}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className={`mic-button ${isRecording ? "recording" : ""}`}
         >
-          <motion.div
-            className="mic-ring"
-            animate={isRecording ? { scale: [1, 1.3, 1], opacity: [0.8, 0.3, 0.8] } : {}}
-            transition={{ duration: 1.5, repeat: isRecording ? Infinity : 0 }}
-          />
-          <motion.div
-            className="mic-core"
-            animate={isRecording ? { scale: [1, 0.9, 1] } : {}}
-            transition={{ duration: 0.8, repeat: isRecording ? Infinity : 0 }}
+          {isRecording ? "⏹️ Stop" : "🎤 Click to Speak"}
+        </button>
+        {showPlayButton && pendingAudioUrl && (
+          <button
+            onClick={playPendingAudio}
+            className="play-button"
           >
-            {isRecording ? (
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <rect x="6" y="6" width="12" height="12" rx="2" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-              </svg>
-            )}
-          </motion.div>
-        </motion.button>
-
-        <AnimatePresence>
-          {showPlayButton && pendingAudioUrl && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              onClick={playPendingAudio}
-              className="jarvis-play"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
-              </svg>
-              <span>Play Response</span>
-            </motion.button>
-          )}
-        </AnimatePresence>
+            🔊 Play Response
+          </button>
+        )}
       </div>
 
       <style jsx>{`
-        .jarvis-interface {
-          position: relative;
+        .voice-chat-simple {
           width: 100%;
-          max-width: 420px;
-          height: 520px;
-          background: linear-gradient(145deg, #0b1f36, #06172c);
-          border: 1px solid rgba(1, 118, 211, 0.3);
-          border-radius: 24px;
-          box-shadow: 0 0 60px rgba(1, 118, 211, 0.2),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+          max-width: 400px;
+          background: white;
+          border-radius: 16px;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
           display: flex;
           flex-direction: column;
           overflow: hidden;
         }
 
-        .jarvis-header {
+        .voice-chat-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding: 1rem 1.25rem;
-          border-bottom: 1px solid rgba(1, 118, 211, 0.2);
-          background: rgba(1, 118, 211, 0.05);
+          border-bottom: 1px solid #e0e0e0;
+          background: #f5f8fc;
         }
 
-        .jarvis-title {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
+        .voice-chat-header span {
+          font-weight: 700;
+          color: #0b1f36;
         }
 
-        .jarvis-icon {
-          width: 32px;
-          height: 32px;
-          color: #0d9dda;
-        }
-
-        .jarvis-title span {
-          color: #0d9dda;
-          font-size: 0.75rem;
-          font-weight: 800;
-          letter-spacing: 0.15em;
-        }
-
-        .jarvis-close {
+        .close-btn {
           width: 28px;
           height: 28px;
           border: none;
-          background: rgba(255, 255, 255, 0.1);
-          color: rgba(255, 255, 255, 0.6);
-          border-radius: 8px;
+          background: #e0e0e0;
+          border-radius: 6px;
           font-size: 1.25rem;
           cursor: pointer;
-          transition: all 0.2s;
+          color: #666;
         }
 
-        .jarvis-close:hover {
-          background: rgba(255, 255, 255, 0.15);
-          color: white;
+        .close-btn:hover {
+          background: #d0d0d0;
         }
 
-        .jarvis-messages {
+        .voice-chat-messages {
           flex: 1;
           overflow-y: auto;
-          padding: 1.5rem;
+          padding: 1.25rem;
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.75rem;
+          max-height: 300px;
         }
 
-        .jarvis-welcome {
+        .welcome-message {
           text-align: center;
-          padding: 2rem 1rem;
+          padding: 1rem;
+          color: #607087;
         }
 
-        .jarvis-status {
+        .error-message {
+          padding: 0.75rem;
+          background: #fff3cd;
+          border: 1px solid #ffc107;
+          border-radius: 8px;
+          color: #856404;
+          font-size: 0.85rem;
+        }
+
+        .message {
+          max-width: 80%;
+          padding: 0.75rem 1rem;
+          border-radius: 12px;
+        }
+
+        .message.user {
+          align-self: flex-end;
+          background: #0176d3;
+          color: white;
+        }
+
+        .message.assistant {
+          align-self: flex-start;
+          background: #f0f0f0;
+          color: #333;
+        }
+
+        .message-content {
+          font-size: 0.9rem;
+          line-height: 1.4;
+        }
+
+        .voice-chat-controls {
+          padding: 1rem;
+          border-top: 1px solid #e0e0e0;
           display: flex;
-          align-items: center;
           justify-content: center;
           gap: 0.5rem;
-          margin-bottom: 1rem;
-          color: #2e844a;
-          font-size: 0.65rem;
-          font-weight: 800;
-          letter-spacing: 0.1em;
         }
 
-        .status-dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: #2e844a;
-        }
-
-        .jarvis-welcome p {
-          color: rgba(255, 255, 255, 0.7);
-          font-size: 0.85rem;
-          line-height: 1.6;
-        }
-
-        .jarvis-message {
-          max-width: 85%;
-          padding: 0.9rem 1.1rem;
-          border-radius: 16px;
-        }
-
-        .jarvis-message.user {
-          align-self: flex-end;
-          background: linear-gradient(135deg, #0176d3, #0d9dda);
-          box-shadow: 0 4px 20px rgba(1, 118, 211, 0.3);
-        }
-
-        .jarvis-message.assistant {
-          align-self: flex-start;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .message-label {
-          font-size: 0.6rem;
-          font-weight: 800;
-          letter-spacing: 0.1em;
-          margin-bottom: 0.35rem;
-          opacity: 0.7;
-        }
-
-        .jarvis-message.user .message-label {
-          color: rgba(255, 255, 255, 0.8);
-        }
-
-        .jarvis-message.assistant .message-label {
-          color: rgba(255, 255, 255, 0.5);
-        }
-
-        .message-text {
-          font-size: 0.85rem;
-          line-height: 1.5;
-          color: white;
-        }
-
-        .message-text.processing {
-          color: rgba(255, 255, 255, 0.5);
-        }
-
-        .jarvis-controls {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 1rem;
-          padding: 1.5rem;
-          border-top: 1px solid rgba(1, 118, 211, 0.2);
-          background: rgba(1, 118, 211, 0.03);
-        }
-
-        .jarvis-mic {
-          position: relative;
-          width: 72px;
-          height: 72px;
+        .mic-button {
+          padding: 0.875rem 1.5rem;
           border: none;
-          border-radius: 50%;
-          background: transparent;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .mic-ring {
-          position: absolute;
-          inset: 0;
-          border-radius: 50%;
-          border: 2px solid #0176d3;
-          opacity: 0.5;
-        }
-
-        .mic-core {
-          position: relative;
-          z-index: 2;
-          width: 52px;
-          height: 52px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #0176d3, #0d9dda);
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          border-radius: 10px;
+          background: #0176d3;
           color: white;
-          box-shadow: 0 4px 20px rgba(1, 118, 211, 0.4);
+          font-size: 0.9rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background 0.2s;
         }
 
-        .mic-core svg {
-          width: 24px;
-          height: 24px;
+        .mic-button:hover:not(:disabled) {
+          background: #0b5cab;
         }
 
-        .jarvis-mic.recording .mic-ring {
-          border-color: #fe9339;
+        .mic-button.recording {
+          background: #dc3545;
         }
 
-        .jarvis-mic.recording .mic-core {
-          background: linear-gradient(135deg, #fe9339, #e3066a);
-          box-shadow: 0 4px 20px rgba(254, 147, 57, 0.4);
-        }
-
-        .jarvis-mic:disabled {
+        .mic-button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
         }
 
-        .jarvis-play {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.75rem 1.25rem;
-          border: 1px solid rgba(46, 132, 74, 0.5);
-          border-radius: 12px;
-          background: rgba(46, 132, 74, 0.15);
-          color: #2e844a;
-          font-size: 0.75rem;
+        .play-button {
+          padding: 0.875rem 1.5rem;
+          border: none;
+          border-radius: 10px;
+          background: #28a745;
+          color: white;
+          font-size: 0.9rem;
           font-weight: 700;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: background 0.2s;
         }
 
-        .jarvis-play svg {
-          width: 18px;
-          height: 18px;
-        }
-
-        .jarvis-play:hover {
-          background: rgba(46, 132, 74, 0.25);
-          border-color: #2e844a;
-        }
-
-        .jarvis-messages::-webkit-scrollbar {
-          width: 4px;
-        }
-
-        .jarvis-messages::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .jarvis-messages::-webkit-scrollbar-thumb {
-          background: rgba(1, 118, 211, 0.3);
-          border-radius: 2px;
+        .play-button:hover {
+          background: #218838;
         }
       `}</style>
-    </motion.div>
+    </div>
   );
 }
