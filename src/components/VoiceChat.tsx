@@ -223,10 +223,12 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       <style jsx>{`
         .voice-chat-simple {
           width: 100%;
-          max-width: 400px;
-          background: white;
-          border-radius: 16px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+          max-width: 420px;
+          background: linear-gradient(145deg, #0b1f36, #06172c);
+          border: 1px solid rgba(1, 118, 211, 0.3);
+          border-radius: 24px;
+          box-shadow: 0 20px 60px rgba(1, 118, 211, 0.2),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.1);
           display: flex;
           flex-direction: column;
           overflow: hidden;
@@ -237,104 +239,120 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
           justify-content: space-between;
           align-items: center;
           padding: 1rem 1.25rem;
-          border-bottom: 1px solid #e0e0e0;
-          background: #f5f8fc;
+          border-bottom: 1px solid rgba(1, 118, 211, 0.2);
+          background: rgba(1, 118, 211, 0.05);
         }
 
         .voice-chat-header span {
-          font-weight: 700;
-          color: #0b1f36;
+          font-weight: 800;
+          color: #0d9dda;
+          letter-spacing: 0.1em;
+          font-size: 0.75rem;
         }
 
         .close-btn {
           width: 28px;
           height: 28px;
           border: none;
-          background: #e0e0e0;
-          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
           font-size: 1.25rem;
           cursor: pointer;
-          color: #666;
+          color: rgba(255, 255, 255, 0.6);
+          transition: all 0.2s;
         }
 
         .close-btn:hover {
-          background: #d0d0d0;
+          background: rgba(255, 255, 255, 0.15);
+          color: white;
         }
 
         .voice-chat-messages {
           flex: 1;
           overflow-y: auto;
-          padding: 1.25rem;
+          padding: 1.5rem;
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
-          max-height: 300px;
+          gap: 1rem;
+          max-height: 320px;
         }
 
         .welcome-message {
           text-align: center;
-          padding: 1rem;
-          color: #607087;
+          padding: 1.5rem 1rem;
+          color: rgba(255, 255, 255, 0.7);
+        }
+
+        .welcome-message p {
+          font-size: 0.85rem;
+          line-height: 1.6;
         }
 
         .error-message {
-          padding: 0.75rem;
-          background: #fff3cd;
-          border: 1px solid #ffc107;
-          border-radius: 8px;
-          color: #856404;
-          font-size: 0.85rem;
+          padding: 0.9rem 1.1rem;
+          background: rgba(254, 147, 57, 0.15);
+          border: 1px solid rgba(254, 147, 57, 0.3);
+          border-radius: 12px;
+          color: #fe9339;
+          font-size: 0.8rem;
+          line-height: 1.5;
         }
 
         .message {
-          max-width: 80%;
-          padding: 0.75rem 1rem;
-          border-radius: 12px;
+          max-width: 85%;
+          padding: 0.9rem 1.1rem;
+          border-radius: 16px;
         }
 
         .message.user {
           align-self: flex-end;
-          background: #0176d3;
-          color: white;
+          background: linear-gradient(135deg, #0176d3, #0d9dda);
+          box-shadow: 0 4px 20px rgba(1, 118, 211, 0.3);
         }
 
         .message.assistant {
           align-self: flex-start;
-          background: #f0f0f0;
-          color: #333;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .message-content {
-          font-size: 0.9rem;
-          line-height: 1.4;
+          font-size: 0.85rem;
+          line-height: 1.5;
+          color: white;
         }
 
         .voice-chat-controls {
-          padding: 1rem;
-          border-top: 1px solid #e0e0e0;
+          padding: 1.5rem;
+          border-top: 1px solid rgba(1, 118, 211, 0.2);
+          background: rgba(1, 118, 211, 0.03);
           display: flex;
           justify-content: center;
-          gap: 0.5rem;
+          gap: 0.75rem;
         }
 
         .mic-button {
           padding: 0.875rem 1.5rem;
           border: none;
-          border-radius: 10px;
-          background: #0176d3;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #0176d3, #0d9dda);
           color: white;
-          font-size: 0.9rem;
-          font-weight: 700;
+          font-size: 0.8rem;
+          font-weight: 800;
+          letter-spacing: 0.05em;
           cursor: pointer;
-          transition: background 0.2s;
+          transition: all 0.2s;
+          box-shadow: 0 4px 20px rgba(1, 118, 211, 0.25);
         }
 
         .mic-button:hover:not(:disabled) {
-          background: #0b5cab;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 25px rgba(1, 118, 211, 0.35);
         }
 
         .mic-button.recording {
-          background: #dc3545;
+          background: linear-gradient(135deg, #fe9339, #e3066a);
+          box-shadow: 0 4px 20px rgba(254, 147, 57, 0.25);
         }
 
         .mic-button:disabled {
@@ -344,18 +362,33 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
         .play-button {
           padding: 0.875rem 1.5rem;
-          border: none;
-          border-radius: 10px;
-          background: #28a745;
-          color: white;
-          font-size: 0.9rem;
-          font-weight: 700;
+          border: 1px solid rgba(46, 132, 74, 0.5);
+          border-radius: 12px;
+          background: rgba(46, 132, 74, 0.15);
+          color: #2e844a;
+          font-size: 0.8rem;
+          font-weight: 800;
+          letter-spacing: 0.05em;
           cursor: pointer;
-          transition: background 0.2s;
+          transition: all 0.2s;
         }
 
         .play-button:hover {
-          background: #218838;
+          background: rgba(46, 132, 74, 0.25);
+          border-color: #2e844a;
+        }
+
+        .voice-chat-messages::-webkit-scrollbar {
+          width: 4px;
+        }
+
+        .voice-chat-messages::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .voice-chat-messages::-webkit-scrollbar-thumb {
+          background: rgba(1, 118, 211, 0.3);
+          border-radius: 2px;
         }
       `}</style>
     </div>
