@@ -1,0 +1,13 @@
+{
+  "name": "Brajesh Kumar",
+  "role": "Salesforce Consultant",
+  "company": "Capgemini",
+  "location": "India",
+  "tagline": "Engineering intelligent Salesforce experiences for real-world service operations.",
+  "summary": "Ready to build the next great Salesforce experience? Let's start the conversation.",
+  "email": "brajeshkumar997@gmail.com",
+  "linkedin": "https://www.linkedin.com/in/brajeshkrsingh/",
+  "resume": "/resume.pdf",
+  "availability": "Open to high-impact Salesforce opportunities",
+  "orbitSkills": ["Apex", "LWC", "Flow", "FSL", "AI"]
+}

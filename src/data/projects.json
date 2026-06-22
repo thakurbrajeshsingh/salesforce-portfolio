@@ -1,0 +1,106 @@
+[
+  {
+    "id": "field-mobile",
+    "title": "FieldForce Nexus",
+    "eyebrow": "Field Service Mobile · Offline Operations",
+    "summary": "Engineered a resilient offline-first field service experience enabling technicians to complete critical work orders, capture updates, and synchronize data seamlessly across low-connectivity environments.",
+    "impact": "Empowered uninterrupted service delivery across geographically distributed field operations.",
+    "metrics": [
+      {
+        "value": "24/7",
+        "label": "service continuity"
+      },
+      {
+        "value": "Offline",
+        "label": "first architecture"
+      }
+    ],
+    "stack": [
+      "Field Service Mobile",
+      "Mobile Offline",
+      "Connected Workforce",
+      "Work Order Execution",
+      "Operational Resilience"
+    ],
+    "accent": "cyan",
+    "featured": true
+  },
+  {
+    "id": "workforce",
+    "title": "Mission Control",
+    "eyebrow": "Workforce Intelligence · Utility Operations",
+    "summary": "Built and enhanced workforce orchestration capabilities supporting intelligent scheduling, dispatch optimization, asset visibility, and real-time operational coordination for a major utility provider.",
+    "impact": "Improved workforce efficiency across large-scale field operations.",
+    "metrics": [
+      {
+        "value": "1000+",
+        "label": "daily work orders"
+      },
+      {
+        "value": "Real-Time",
+        "label": "dispatch visibility"
+      }
+    ],
+    "stack": [
+      "Workforce Intelligence",
+      "Smart Dispatch",
+      "Real-Time Operations",
+      "Enterprise Scale",
+      "Utility Transformation"
+    ],
+    "accent": "blue",
+    "featured": true
+  },
+  {
+    "id": "lwc-performance",
+    "title": "Lightning Velocity",
+    "eyebrow": "Service Cloud · Experience Engineering",
+    "summary": "Redesigned high-traffic Lightning components using efficient data access patterns, lazy loading, and optimized client-side architecture to enhance user experience at scale.",
+    "impact": "Delivered faster application performance and improved agent productivity.",
+    "metrics": [
+      {
+        "value": "40%",
+        "label": "faster rendering"
+      },
+      {
+        "value": "Reduced",
+        "label": "API consumption"
+      }
+    ],
+    "stack": [
+      "Lightning Experience",
+      "Performance Engineering",
+      "Scalable Architecture",
+      "User Experience",
+      "Service Cloud"
+    ],
+    "accent": "violet",
+    "featured": true
+  },
+  {
+    "id": "automation",
+    "title": "FlowMatrix",
+    "eyebrow": "Automation · Event-Driven Architecture",
+    "summary": "Designed enterprise-grade automation frameworks for case management, approval workflows, maintenance operations, and event-driven business processes.",
+    "impact": "Reduced manual effort while improving process consistency and operational agility.",
+    "metrics": [
+      {
+        "value": "60%+",
+        "label": "manual effort reduced"
+      },
+      {
+        "value": "Multi-Step",
+        "label": "workflow automation"
+      }
+    ],
+    "stack": [
+      "Workflow Automation",
+      "Case Intelligence",
+      "Event-Driven Processes",
+      "Approval Orchestration",
+      "Service Operations"
+    ],
+    "accent": "orange",
+    "featured": false
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "service-agent",
+    "title": "Service Agent — Case Resolution",
+    "status": "Deployed",
+    "summary": "Topic and action architecture for case triage, knowledge retrieval, updates, and trusted escalation.",
+    "capabilities": ["Search Knowledge", "Update Case", "Create Work Order", "Human Handoff"],
+    "accent": "green"
+  },
+  {
+    "id": "case-routing",
+    "title": "Einstein Case Classification",
+    "status": "Prototype",
+    "summary": "AI-assisted classification and routing for utility service cases with transparent prediction logging.",
+    "capabilities": ["Classify Intent", "Predict Severity", "Route Queue"],
+    "accent": "blue"
+  },
+  {
+    "id": "technician-copilot",
+    "title": "Field Technician Assistant",
+    "status": "Prototype",
+    "summary": "Mobile assistance concept combining work-order context, knowledge, parts lookup, and guided troubleshooting.",
+    "capabilities": ["Work Context", "Parts Search", "Guided Steps"],
+    "accent": "cyan"
+  },
+  {
+    "id": "prompt-library",
+    "title": "Trusted Prompt Library",
+    "status": "Exploring",
+    "summary": "Reusable prompt templates and evaluation patterns for reliable service responses and agent actions.",
+    "capabilities": ["Prompt Templates", "Guardrails", "Evaluation"],
+    "accent": "violet"
+  }
+]

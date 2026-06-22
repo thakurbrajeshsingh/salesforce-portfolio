@@ -1,0 +1,50 @@
+[
+  {
+    "id": "service",
+    "name": "Salesforce Service Cloud Consultant",
+    "issuer": "Salesforce",
+    "year": "2026",
+    "level": "Consultant",
+    "accent": "orange"
+  },
+  {
+    "id": "admin",
+    "name": "Salesforce Certified Administrator",
+    "issuer": "Salesforce",
+    "year": "2025",
+    "level": "Foundation",
+    "accent": "blue"
+  },
+  {
+    "id": "jsDev",
+    "name": "Salesforce JavaScript Developer I",
+    "issuer": "Salesforce",
+    "year": "2025",
+    "level": "Developer",
+    "accent": "green"
+  },
+  {
+    "id": "agentforce",
+    "name": "Salesforce Agentforce Specialist",
+    "issuer": "Salesforce",
+    "year": "2024",
+    "level": "AI Specialist",
+    "accent": "green"
+  },
+  {
+    "id": "aiAssociate",
+    "name": "Salesforce AI Associate",
+    "issuer": "Salesforce",
+    "year": "2024",
+    "level": "AI Specialist",
+    "accent": "violet"
+  },
+  {
+    "id": "pd1",
+    "name": "Salesforce Platform Developer I",
+    "issuer": "Salesforce",
+    "year": "2024",
+    "level": "Developer",
+    "accent": "violet"
+  }
+]

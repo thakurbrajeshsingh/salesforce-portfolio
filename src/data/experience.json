@@ -1,0 +1,68 @@
+[
+  {
+    "id": "field-service",
+    "period": "2025 — Present",
+    "role": "Salesforce Technical Consultant",
+    "organization": "Capgemini Technology Services India Limited",
+    "summary": "Powering enterprise field operations through intelligent service execution, connected workforce experiences, mobile-first architecture, and scalable Salesforce innovation.",
+    "highlights": [
+      "Field Service Excellence",
+      "Workforce Intelligence",
+      "Mobile Offline Innovation",
+      "Enterprise Integrations"
+    ],
+    "technologies": [
+      "Field Service Lightning",
+      "Mobile Offline",
+      "GraphQL",
+      "Platform Events",
+      "REST APIs",
+      "Agentforce"
+    ],
+    "accent": "blue"
+  },
+  {
+    "id": "service-specialist",
+    "period": "2023 — 2024",
+    "role": "Salesforce Developer",
+    "organization": "Capgemini Technology Services India Limited",
+    "summary": "Built scalable Salesforce experiences that transformed service operations through automation, Lightning experiences, and customer-centric platform solutions.",
+    "highlights": [
+      "Platform Innovation",
+      "Automation Architecture",
+      "Lightning Experiences",
+      "Customer Success"
+    ],
+    "technologies": [
+      "Service Cloud",
+      "Lightning Web Components",
+      "Apex",
+      "Flow Automation",
+      "Omni-Channel",
+      "Integration Services"
+    ],
+    "accent": "violet"
+  },
+  {
+    "id": "foundation",
+    "period": "2023",
+    "role": "SDE Intern",
+    "organization": "Silicon Techlab Pvt. Ltd.",
+    "summary": "Where the journey began—crafting modern digital experiences across web and mobile platforms while building the engineering mindset that drives innovation today.",
+    "highlights": [
+      "Digital Product Builder",
+      "Cross-Platform Engineering",
+      "Mobile Experience Creator",
+      "Frontend Innovation"
+    ],
+    "technologies": [
+      "React.js",
+      "React Native",
+      "JavaScript",
+      "Progressive Web Apps",
+      "Mobile Solutions",
+      "API Integrations"
+    ],
+    "accent": "cyan"
+  }
+]

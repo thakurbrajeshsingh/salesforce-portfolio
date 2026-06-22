@@ -1,0 +1,9 @@
+[
+  { "label": "Journey", "href": "#journey" },
+  { "label": "Projects", "href": "#projects" },
+  { "label": "Skills", "href": "#skills" },
+  { "label": "Credentials", "href": "#certifications" },
+  { "label": "AI Lab", "href": "#ai-lab" },
+  { "label": "Awards", "href": "#awards" },
+  { "label": "Contact", "href": "#contact" }
+]

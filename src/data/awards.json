@@ -1,0 +1,23 @@
+[
+  {
+    "id": "customer-delight",
+    "title": "Customer Delight",
+    "year": "2025",
+    "category": "Client Success",
+    "description": "Delivered solutions that earned lasting client trust."
+  },
+  {
+    "id": "star",
+    "title": "Star Performer",
+    "year": "2024",
+    "category": "Innovation & Growth",
+    "description": "Recognized for rapid growth, ownership, and technical excellence."
+  },
+  {
+    "id": "meritorious-performance",
+    "title": "Meritorious Performance",
+    "year": "2023",
+    "category": "Salesforce Foundation",
+    "description": "Honored for outstanding performance during Salesforce CRM training."
+  }
+]

@@ -1,0 +1,142 @@
+[
+  {
+    "id": "salesforce-clouds",
+    "name": "Salesforce Ecosystem",
+    "description": "Delivering customer, service, and field operations across Salesforce's most powerful cloud solutions.",
+    "accent": "blue",
+    "skills": [
+      {
+        "name": "Field Service Lightning",
+        "level": 95,
+        "evidence": "Mobile & workforce operations"
+      },
+      {
+        "name": "Service Cloud",
+        "level": 90,
+        "evidence": "Case management & automation"
+      },
+      {
+        "name": "Sales Cloud",
+        "level": 85,
+        "evidence": "CRM process optimization"
+      },
+      {
+        "name": "Experience Cloud",
+        "level": 80,
+        "evidence": "Customer experiences"
+      }
+    ]
+  },
+  {
+    "id": "engineering",
+    "name": "Platform Engineering",
+    "description": "Building scalable Salesforce applications through modern development frameworks and platform capabilities.",
+    "accent": "cyan",
+    "skills": [
+      {
+        "name": "Lightning Web Components",
+        "level": 92,
+        "evidence": "Enterprise user experiences"
+      },
+      {
+        "name": "Apex",
+        "level": 90,
+        "evidence": "Business logic & integrations"
+      },
+      {
+        "name": "JavaScript",
+        "level": 88,
+        "evidence": "Modern frontend development"
+      },
+      {
+        "name": "Visualforce",
+        "level": 80,
+        "evidence": "Legacy platform solutions"
+      }
+    ]
+  },
+  {
+    "id": "data-integration",
+    "name": "Data & Connectivity",
+    "description": "Connecting enterprise systems through scalable APIs, data models, and integration patterns.",
+    "accent": "violet",
+    "skills": [
+      {
+        "name": "SOQL",
+        "level": 90,
+        "evidence": "Data retrieval & optimization"
+      },
+      {
+        "name": "GraphQL",
+        "level": 82,
+        "evidence": "Composable data access"
+      },
+      {
+        "name": "REST APIs",
+        "level": 88,
+        "evidence": "System integrations"
+      },
+      {
+        "name": "DataLoader.io",
+        "level": 80,
+        "evidence": "Data migration"
+      }
+    ]
+  },
+  {
+    "id": "delivery",
+    "name": "DevOps & Delivery",
+    "description": "Accelerating releases through version control, CI/CD pipelines, and collaborative delivery practices.",
+    "accent": "green",
+    "skills": [
+      {
+        "name": "Copado",
+        "level": 88,
+        "evidence": "Salesforce DevOps"
+      },
+      {
+        "name": "Git & GitHub",
+        "level": 85,
+        "evidence": "Version control"
+      },
+      {
+        "name": "Azure DevOps",
+        "level": 82,
+        "evidence": "Agile delivery"
+      },
+      {
+        "name": "Jira",
+        "level": 85,
+        "evidence": "Project execution"
+      }
+    ]
+  },
+  {
+    "id": "future",
+    "name": "Agentforce & AI",
+    "description": "Expanding enterprise capabilities through AI-powered automation and intelligent service experiences.",
+    "accent": "orange",
+    "skills": [
+      {
+        "name": "Agentforce",
+        "level": 85,
+        "evidence": "Agent actions & topics"
+      },
+      {
+        "name": "Prompt Builder",
+        "level": 80,
+        "evidence": "Grounded experiences"
+      },
+      {
+        "name": "Einstein AI",
+        "level": 80,
+        "evidence": "Predictive intelligence"
+      },
+      {
+        "name": "GenAI Tools",
+        "level": 85,
+        "evidence": "AI-assisted development"
+      }
+    ]
+  }
+]
