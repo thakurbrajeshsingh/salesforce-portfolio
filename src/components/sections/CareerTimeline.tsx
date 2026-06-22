@@ -16,7 +16,7 @@ export default function CareerTimeline({ content }: { content: PortfolioContent 
     <section id="journey" className="page-section">
       <div className="content-wrap">
         <SectionHeading
-          eyebrow="Interactive career timeline"
+          eyebrow="Career timeline"
           title="A career built in layers."
           copy="From platform foundations to enterprise Field Service delivery and Agentforce—each chapter compounds the one before it."
         />
