@@ -1,10 +1,11 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { useRef, useState } from "react";
 import AnimatedText from "@/components/ui/AnimatedText";
 import GlassCard from "@/components/ui/GlassCard";
 import Icon from "@/components/ui/Icon";
+import VoiceChat from "@/components/VoiceChat";
 import type { PortfolioContent } from "@/types/content";
 
 export default function MissionControl({ content }: { content: PortfolioContent }) {
@@ -12,6 +13,7 @@ export default function MissionControl({ content }: { content: PortfolioContent 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [0, 120]);
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0.3]);
+  const [showVoiceChat, setShowVoiceChat] = useState(false);
 
   return (
     <section id="top" ref={ref} className="hero-section">
@@ -128,10 +130,21 @@ export default function MissionControl({ content }: { content: PortfolioContent 
                 animate={{ rotate: -360 }}
                 transition={{ duration: 42, repeat: Infinity, ease: "linear" }}
               />
-              <div className="profile-core">
+              <motion.div
+                className="profile-core"
+                onClick={() => setShowVoiceChat(true)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{ cursor: "pointer" }}
+              >
+                <motion.div
+                  className="pulse-ring"
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.8, 0.3, 0.8] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
                 <span>Brajesh Ai</span>
                 {/* <small>{content.profile.role}</small> */}
-              </div>
+              </motion.div>
               {content.profile.orbitSkills.map((item, index) => (
                 <motion.span
                   key={item}
@@ -163,6 +176,27 @@ export default function MissionControl({ content }: { content: PortfolioContent 
           </GlassCard>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {showVoiceChat && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="voice-chat-overlay"
+            onClick={() => setShowVoiceChat(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <VoiceChat onClose={() => setShowVoiceChat(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

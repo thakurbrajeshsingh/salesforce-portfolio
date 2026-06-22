@@ -91,6 +91,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(1,118,211,.35); 
 .orbit-ring-one { width: 210px; height: 210px; }
 .orbit-ring-two { width: 290px; height: 290px; border-style: dashed; }
 .profile-core { position: relative; z-index: 3; display: grid; place-items: center; width: 125px; height: 125px; border: 1px solid #c5def3; border-radius: 38px; background: linear-gradient(145deg,#fff,#e9f5ff); box-shadow: 0 18px 45px rgba(1,118,211,.18); transform: rotate(45deg); }
+.pulse-ring { position: absolute; inset: -8px; border-radius: 38px; border: 2px solid var(--blue); opacity: 0.5; pointer-events: none; }
 .profile-core span,.profile-core small { transform: rotate(-45deg); }
 .profile-core span { color:var(--blue);font:900 1.2rem var(--font-display); }
 .profile-core small { position:absolute; width:120px; top:74px; text-align:center; color:var(--muted); font-size:.58rem;font-weight:800; }
@@ -132,3 +133,4 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(1,118,211,.35); 
 @media (prefers-reduced-motion: reduce) {
   html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
 }
+.voice-chat-overlay { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: rgba(6,23,44,.85); backdrop-filter: blur(8px); padding: 1rem; }
