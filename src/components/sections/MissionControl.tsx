@@ -116,7 +116,7 @@ export default function MissionControl({ content }: { content: PortfolioContent 
         >
           <GlassCard glow className="mission-card">
             <div className="mission-card-top">
-              <span>Candidate signal</span>
+              <span>Agent Mode</span>
               <span className="live-signal">Live profile</span>
             </div>
             <div className="profile-orbit">

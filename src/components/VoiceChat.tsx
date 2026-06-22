@@ -174,7 +174,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   return (
     <div className="voice-chat-simple">
       <div className="voice-chat-header">
-        <span>Brajesh AI</span>
+        <span>Meet My AI Twin</span>
         {onClose && <button onClick={onClose} className="close-btn">×</button>}
       </div>
 
@@ -183,7 +183,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
         {messages.length === 0 && !error && (
           <div className="welcome-message">
-            <p>Ask me about Salesforce, Field Service, or my experience.</p>
+            <p>I'm Brajesh's AI twin. Ask me anything about his experience and projects.</p>
           </div>
         )}
 
@@ -208,7 +208,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
           disabled={isLoading || isSpeaking}
           className={`mic-button ${isRecording ? "recording" : ""}`}
         >
-          {isRecording ? "⏹️ Stop" : "🎤 Click to Speak"}
+          {isRecording ? "⏹️ I'm Done Speaking" : "Speak with My AI Twin"}
         </button>
         {showPlayButton && pendingAudioUrl && (
           <button
