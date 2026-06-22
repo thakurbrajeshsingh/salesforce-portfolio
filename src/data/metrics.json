@@ -2,5 +2,5 @@
   { "value": "60%+", "label": "manual processes automated" },
   { "value": "40%", "label": "faster component rendering" },
   { "value": "1,000s", "label": "of work orders supported daily" },
-  { "value": "4", "label": "Salesforce credentials" }
+  { "value": "6", "label": "Salesforce credentials" }
 ]

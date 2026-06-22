@@ -129,8 +129,8 @@ export default function MissionControl({ content }: { content: PortfolioContent 
                 transition={{ duration: 42, repeat: Infinity, ease: "linear" }}
               />
               <div className="profile-core">
-                <span>BK</span>
-                <small>{content.profile.role}</small>
+                <span>Brajesh Ai</span>
+                {/* <small>{content.profile.role}</small> */}
               </div>
               {content.profile.orbitSkills.map((item, index) => (
                 <motion.span
