@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
+import agentforceGif from "../app/agentforce.gif";
 
 interface Message {
   role: "user" | "assistant";
@@ -171,66 +173,71 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   };
 
   return (
-  <div className="agentforce-wrapper">
-    <div className="agentforce-card">
+    <div className="agentforce-wrapper">
+      <div className="agentforce-card">
 
-      <div className="agentforce-header">
-        <div className="header-left">
-          <div className="agentforce-icon">✦</div>
+        <div className="agentforce-header">
+          <div className="header-left">
+            <div className="agentforce-icon">✦</div>
 
-          <div>
-            <div className="agentforce-title">Agentforce</div>
-            <div className="agentforce-subtitle">
-              Brajesh AI Assistant
+            <div>
+              <div className="agentforce-title">Agentforce</div>
+              <div className="agentforce-subtitle">
+                Brajesh AI Assistant
+              </div>
             </div>
           </div>
+
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="close-btn"
+            >
+              ×
+            </button>
+          )}
         </div>
 
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="close-btn"
-          >
-            ×
-          </button>
-        )}
-      </div>
+        <div className="agent-section">
 
-      <div className="agent-section">
-
-        <div className="avatar-container">
-          <div
-            className={`avatar-circle ${
-              isRecording
+          <div className="avatar-container">
+            <div
+              className={`avatar-circle ${isRecording
                 ? "listening"
                 : isSpeaking
-                ? "speaking"
-                : ""
-            }`}
-          >
-            BK
+                  ? "speaking"
+                  : ""
+                }`}
+            >
+              <Image
+                src={agentforceGif.src}
+                alt="Agentforce"
+                width={120}
+                height={120}
+                className="avatar-image"
+              />
+            </div>
           </div>
-        </div>
 
-        <h2 className="agent-name">
-          Brajesh Kumar
-        </h2>
+          <h2 className="agent-name">
+            Brajesh Kumar
+          </h2>
 
-        <p className="agent-role">
-          😄 The portfolio is free to read... my AI twin isn't. Browse first!
-        </p>
+          <p className="agent-role">
+            😄 The portfolio is free to read... my AI twin isn't. Browse first!
+          </p>
 
-        <div className="status-pill">
-          {isRecording
-            ? "🎤 Listening..."
-            : isLoading
-            ? "⚡ Thinking..."
-            : isSpeaking
-            ? "🔊 Speaking..."
-            : "✓ Ready"}
-        </div>
+          <div className="status-pill">
+            {isRecording
+              ? "🎤 Listening..."
+              : isLoading
+                ? "⚡ Thinking..."
+                : isSpeaking
+                  ? "🔊 Speaking..."
+                  : "✓ Ready"}
+          </div>
 
-        {/* <p className="intro-text">
+          {/* <p className="intro-text">
           Ask me about Salesforce projects,
           certifications, Field Service,
           Agentforce, Apex, LWC, and my
@@ -244,41 +251,40 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
           <button>Certifications</button>
         </div> */}
 
-        {error && (
-          <div className="error-box">
-            {error}
-          </div>
-        )}
-
-        <button
-          onClick={
-            isRecording
-              ? stopRecording
-              : startRecording
-          }
-          disabled={isLoading || isSpeaking}
-          className={`primary-button ${
-            isRecording ? "recording" : ""
-          }`}
-        >
-          {isRecording
-            ? "Stop Recording"
-            : "Start Conversation"}
-        </button>
-
-        {showPlayButton &&
-          pendingAudioUrl && (
-            <button
-              onClick={playPendingAudio}
-              className="secondary-button"
-            >
-              Play Response
-            </button>
+          {error && (
+            <div className="error-box">
+              {error}
+            </div>
           )}
-      </div>
-    </div>
 
-    <style jsx>{`
+          <button
+            onClick={
+              isRecording
+                ? stopRecording
+                : startRecording
+            }
+            disabled={isLoading || isSpeaking}
+            className={`primary-button ${isRecording ? "recording" : ""
+              }`}
+          >
+            {isRecording
+              ? "Stop Recording"
+              : "Start Conversation"}
+          </button>
+
+          {showPlayButton &&
+            pendingAudioUrl && (
+              <button
+                onClick={playPendingAudio}
+                className="secondary-button"
+              >
+                Play Response
+              </button>
+            )}
+        </div>
+      </div>
+
+      <style jsx>{`
       .agentforce-wrapper {
         width: 100%;
         display: flex;
@@ -365,6 +371,13 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
         display: flex;
         justify-content: center;
         align-items: center;
+        overflow: hidden;
+      }
+
+      .avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .avatar-circle.listening {
@@ -493,7 +506,6 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
         border-radius: 8px;
       }
     `}</style>
-  </div>
-);
-  
+    </div>
+  );
 }
