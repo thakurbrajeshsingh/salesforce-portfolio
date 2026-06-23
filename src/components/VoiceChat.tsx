@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,11 +19,15 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const [error, setError] = useState<string | null>(null);
   const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
   const [showPlayButton, setShowPlayButton] = useState(false);
+  const [audioLevels, setAudioLevels] = useState<number[]>(new Array(20).fill(0));
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const microphoneStreamRef = useRef<MediaStream | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   const startRecording = async () => {
     try {
@@ -38,6 +42,15 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       }
       
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      microphoneStreamRef.current = stream;
+      
+      // Set up audio analyzer for waveform visualization
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      const analyser = audioContextRef.current.createAnalyser();
+      analyser.fftSize = 64;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+      
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -64,6 +77,12 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       setIsRecording(false);
+      
+      // Stop microphone stream and analyzer
+      if (microphoneStreamRef.current) {
+        microphoneStreamRef.current.getTracks().forEach(track => track.stop());
+        microphoneStreamRef.current = null;
+      }
     }
   };
 
@@ -153,8 +172,9 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   };
 
   const playAudio = async (audioBlob: Blob) => {
+    console.log("playAudio called with blob size:", audioBlob.size);
     setIsSpeaking(true);
-    console.log("Playing audio blob, size:", audioBlob.size);
+    console.log("isSpeaking set to true");
     console.log("AudioContext state:", audioContextRef.current?.state);
     
     try {
@@ -200,6 +220,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       gainNode.connect(audioContextRef.current!.destination);
       
       console.log("Audio chain connected: source -> gain -> destination");
+      console.log("Destination:", audioContextRef.current!.destination);
       
       source.onended = () => {
         console.log("Audio playback ended");
@@ -243,6 +264,12 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       audioSourceRef.current = null;
     }
     
+    // Stop animation
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
     if (pendingAudioUrl) {
       URL.revokeObjectURL(pendingAudioUrl);
       setPendingAudioUrl(null);
@@ -250,12 +277,63 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     setIsSpeaking(false);
     setIsRecording(false);
     setShowPlayButton(false);
+    setAudioLevels(new Array(20).fill(0));
     
     // Call the onClose callback
     if (onClose) {
       onClose();
     }
   };
+
+  // Update audio levels from analyzer (recording) or simulate (speaking)
+  useEffect(() => {
+    console.log("Waveform effect triggered, isRecording:", isRecording, "isSpeaking:", isSpeaking);
+    
+    if (!isRecording && !isSpeaking) {
+      setAudioLevels(new Array(20).fill(0));
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      return;
+    }
+
+    const updateAudioLevels = () => {
+      const levels = new Array(20).fill(0);
+
+      if (isRecording && analyserRef.current) {
+        // Use real analyzer data for recording
+        const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+        analyserRef.current.getByteFrequencyData(dataArray);
+
+        for (let i = 0; i < 20; i++) {
+          const startIndex = Math.floor(i * dataArray.length / 20);
+          const endIndex = Math.floor((i + 1) * dataArray.length / 20);
+          let sum = 0;
+          for (let j = startIndex; j < endIndex; j++) {
+            sum += dataArray[j];
+          }
+          levels[i] = sum / (endIndex - startIndex) / 255; // Normalize to 0-1
+        }
+      } else if (isSpeaking) {
+        // Simulate waveform for speaking
+        for (let i = 0; i < 20; i++) {
+          levels[i] = Math.random() * 0.5 + 0.3;
+        }
+      }
+
+      setAudioLevels(levels);
+      animationFrameRef.current = requestAnimationFrame(updateAudioLevels);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(updateAudioLevels);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isRecording, isSpeaking]);
 
   return (
   <div className="agentforce-wrapper">
@@ -298,6 +376,21 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
             BK
           </div>
         </div>
+
+        {(isRecording || isSpeaking) && (
+          <div className="waveform-container">
+            {audioLevels.map((level, index) => (
+              <div
+                key={index}
+                className="waveform-bar"
+                style={{
+                  height: `${Math.max(level * 100, 5)}%`,
+                  backgroundColor: isRecording ? '#0176d3' : '#2e844a',
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         <h2 className="agent-name">
           Brajesh Kumar
@@ -460,6 +553,22 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
       .avatar-circle.speaking {
         animation: bounce 1s infinite;
+      }
+
+      .waveform-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        height: 40px;
+        margin: 15px 0;
+      }
+
+      .waveform-bar {
+        width: 4px;
+        border-radius: 2px;
+        transition: height 0.05s ease;
+        min-height: 5px;
       }
 
       @keyframes pulse {
