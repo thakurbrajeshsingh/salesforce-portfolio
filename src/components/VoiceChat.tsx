@@ -22,10 +22,20 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   const startRecording = async () => {
     try {
       setError(null);
+      
+      // Initialize AudioContext on user gesture to enable autoplay later
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+      
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -142,25 +152,28 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
   const playAudio = async (audioUrl: string) => {
     setIsSpeaking(true);
-    const audio = new Audio(audioUrl);
-
-    audio.onended = () => {
-      setIsSpeaking(false);
-      URL.revokeObjectURL(audioUrl);
-      setPendingAudioUrl(null);
-    };
-
-    audio.onerror = () => {
-      setIsSpeaking(false);
-      setShowPlayButton(true);
-    };
-
+    
     try {
-      await audio.play();
+      // Use Web Audio API with the established AudioContext
+      const response = await fetch(audioUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
+      
+      const source = audioContextRef.current!.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioContextRef.current!.destination);
+      
+      source.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        setPendingAudioUrl(null);
+      };
+      
+      source.start(0);
     } catch (error) {
-      console.log("Autoplay blocked, showing play button");
-      setShowPlayButton(true);
+      console.error("Error playing audio:", error);
       setIsSpeaking(false);
+      setShowPlayButton(true);
     }
   };
 
