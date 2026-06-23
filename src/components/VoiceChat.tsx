@@ -170,227 +170,330 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     playAudio(pendingAudioUrl);
   };
 
-
   return (
-    <div className="voice-chat-simple">
-      <div className="voice-chat-header">
-        <span>Meet My AI Twin</span>
-        {onClose && <button onClick={onClose} className="close-btn">×</button>}
-      </div>
+  <div className="agentforce-wrapper">
+    <div className="agentforce-card">
 
-      <div className="voice-chat-messages">
-        {error && <div className="error-message">{error}</div>}
+      <div className="agentforce-header">
+        <div className="header-left">
+          <div className="agentforce-icon">✦</div>
 
-        {messages.length === 0 && !error && (
-          <div className="welcome-message">
-            <p>I'm Brajesh's AI twin. Ask me anything about his experience and projects.</p>
-          </div>
-        )}
-
-        {messages.map((message, index) => (
-          message.role === "user" && (
-            <div key={index} className="message user">
-              <div className="message-content">{message.content}</div>
+          <div>
+            <div className="agentforce-title">Agentforce</div>
+            <div className="agentforce-subtitle">
+              Brajesh AI Assistant
             </div>
-          )
-        ))}
-
-        {isLoading && (
-          <div className="message assistant">
-            <div className="message-content">Processing...</div>
           </div>
-        )}
-      </div>
+        </div>
 
-      <div className="voice-chat-controls">
-        <button
-          onClick={isRecording ? stopRecording : startRecording}
-          disabled={isLoading || isSpeaking}
-          className={`mic-button ${isRecording ? "recording" : ""}`}
-        >
-          {isRecording ? "⏹️ I'm Done Speaking" : "Speak with My AI Twin"}
-        </button>
-        {showPlayButton && pendingAudioUrl && (
+        {onClose && (
           <button
-            onClick={playPendingAudio}
-            className="play-button"
+            onClick={onClose}
+            className="close-btn"
           >
-            🔊 Play Response
+            ×
           </button>
         )}
       </div>
 
-      <style jsx>{`
-        .voice-chat-simple {
-          width: 100%;
-          max-width: 420px;
-          background: linear-gradient(145deg, #0b1f36, #06172c);
-          border: 1px solid rgba(1, 118, 211, 0.3);
-          border-radius: 24px;
-          box-shadow: 0 20px 60px rgba(1, 118, 211, 0.2),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
+      <div className="agent-section">
 
-        .voice-chat-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem 1.25rem;
-          border-bottom: 1px solid rgba(1, 118, 211, 0.2);
-          background: rgba(1, 118, 211, 0.05);
-        }
+        <div className="avatar-container">
+          <div
+            className={`avatar-circle ${
+              isRecording
+                ? "listening"
+                : isSpeaking
+                ? "speaking"
+                : ""
+            }`}
+          >
+            BK
+          </div>
+        </div>
 
-        .voice-chat-header span {
-          font-weight: 800;
-          color: #0d9dda;
-          letter-spacing: 0.1em;
-          font-size: 0.75rem;
-        }
+        <h2 className="agent-name">
+          Brajesh Kumar
+        </h2>
 
-        .close-btn {
-          width: 28px;
-          height: 28px;
-          border: none;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 8px;
-          font-size: 1.25rem;
-          cursor: pointer;
-          color: rgba(255, 255, 255, 0.6);
-          transition: all 0.2s;
-        }
+        <p className="agent-role">
+          😄 The portfolio is free to read... my AI twin isn't. Browse first!
+        </p>
 
-        .close-btn:hover {
-          background: rgba(255, 255, 255, 0.15);
-          color: white;
-        }
+        <div className="status-pill">
+          {isRecording
+            ? "🎤 Listening..."
+            : isLoading
+            ? "⚡ Thinking..."
+            : isSpeaking
+            ? "🔊 Speaking..."
+            : "✓ Ready"}
+        </div>
 
-        .voice-chat-messages {
-          flex: 1;
-          overflow-y: auto;
-          padding: 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          max-height: 320px;
-        }
+        {/* <p className="intro-text">
+          Ask me about Salesforce projects,
+          certifications, Field Service,
+          Agentforce, Apex, LWC, and my
+          professional experience.
+        </p>
 
-        .welcome-message {
-          text-align: center;
-          padding: 1.5rem 1rem;
-          color: rgba(255, 255, 255, 0.7);
-        }
+        <div className="prompt-grid">
+          <button>Projects</button>
+          <button>Agentforce</button>
+          <button>Field Service</button>
+          <button>Certifications</button>
+        </div> */}
 
-        .welcome-message p {
-          font-size: 0.85rem;
-          line-height: 1.6;
-        }
+        {error && (
+          <div className="error-box">
+            {error}
+          </div>
+        )}
 
-        .error-message {
-          padding: 0.9rem 1.1rem;
-          background: rgba(254, 147, 57, 0.15);
-          border: 1px solid rgba(254, 147, 57, 0.3);
-          border-radius: 12px;
-          color: #fe9339;
-          font-size: 0.8rem;
-          line-height: 1.5;
-        }
+        <button
+          onClick={
+            isRecording
+              ? stopRecording
+              : startRecording
+          }
+          disabled={isLoading || isSpeaking}
+          className={`primary-button ${
+            isRecording ? "recording" : ""
+          }`}
+        >
+          {isRecording
+            ? "Stop Recording"
+            : "Start Conversation"}
+        </button>
 
-        .message {
-          max-width: 85%;
-          padding: 0.9rem 1.1rem;
-          border-radius: 16px;
-        }
-
-        .message.user {
-          align-self: flex-end;
-          background: linear-gradient(135deg, #0176d3, #0d9dda);
-          box-shadow: 0 4px 20px rgba(1, 118, 211, 0.3);
-        }
-
-        .message.assistant {
-          align-self: flex-start;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .message-content {
-          font-size: 0.85rem;
-          line-height: 1.5;
-          color: white;
-        }
-
-        .voice-chat-controls {
-          padding: 1.5rem;
-          border-top: 1px solid rgba(1, 118, 211, 0.2);
-          background: rgba(1, 118, 211, 0.03);
-          display: flex;
-          justify-content: center;
-          gap: 0.75rem;
-        }
-
-        .mic-button {
-          padding: 0.875rem 1.5rem;
-          border: none;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #0176d3, #0d9dda);
-          color: white;
-          font-size: 0.8rem;
-          font-weight: 800;
-          letter-spacing: 0.05em;
-          cursor: pointer;
-          transition: all 0.2s;
-          box-shadow: 0 4px 20px rgba(1, 118, 211, 0.25);
-        }
-
-        .mic-button:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 25px rgba(1, 118, 211, 0.35);
-        }
-
-        .mic-button.recording {
-          background: linear-gradient(135deg, #fe9339, #e3066a);
-          box-shadow: 0 4px 20px rgba(254, 147, 57, 0.25);
-        }
-
-        .mic-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .play-button {
-          padding: 0.875rem 1.5rem;
-          border: 1px solid rgba(46, 132, 74, 0.5);
-          border-radius: 12px;
-          background: rgba(46, 132, 74, 0.15);
-          color: #2e844a;
-          font-size: 0.8rem;
-          font-weight: 800;
-          letter-spacing: 0.05em;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .play-button:hover {
-          background: rgba(46, 132, 74, 0.25);
-          border-color: #2e844a;
-        }
-
-        .voice-chat-messages::-webkit-scrollbar {
-          width: 4px;
-        }
-
-        .voice-chat-messages::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .voice-chat-messages::-webkit-scrollbar-thumb {
-          background: rgba(1, 118, 211, 0.3);
-          border-radius: 2px;
-        }
-      `}</style>
+        {showPlayButton &&
+          pendingAudioUrl && (
+            <button
+              onClick={playPendingAudio}
+              className="secondary-button"
+            >
+              Play Response
+            </button>
+          )}
+      </div>
     </div>
-  );
+
+    <style jsx>{`
+      .agentforce-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .agentforce-card {
+        width: 100%;
+        max-width: 430px;
+        background: #ffffff;
+        border: 1px solid #dddbda;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow:
+          0 2px 8px rgba(0,0,0,0.08),
+          0 8px 24px rgba(0,0,0,0.08);
+      }
+
+      .agentforce-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 20px;
+        border-bottom: 1px solid #dddbda;
+        background: #fafaf9;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .agentforce-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: #0176d3;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+      }
+
+      .agentforce-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #032d60;
+      }
+
+      .agentforce-subtitle {
+        font-size: 12px;
+        color: #706e6b;
+      }
+
+      .close-btn {
+        border: none;
+        background: none;
+        font-size: 22px;
+        color: #706e6b;
+        cursor: pointer;
+      }
+
+      .agent-section {
+        padding: 30px 24px;
+        text-align: center;
+      }
+
+      .avatar-container {
+        display: flex;
+        justify-content: center;
+      }
+
+      .avatar-circle {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        border: 4px solid #0176d3;
+        background: #eef4ff;
+        color: #032d60;
+        font-size: 30px;
+        font-weight: 700;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .avatar-circle.listening {
+        animation: pulse 1.5s infinite;
+      }
+
+      .avatar-circle.speaking {
+        animation: bounce 1s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow:
+            0 0 0 0 rgba(1,118,211,0.4);
+        }
+
+        100% {
+          box-shadow:
+            0 0 0 28px rgba(1,118,211,0);
+        }
+      }
+
+      @keyframes bounce {
+        0% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(1.06);
+        }
+
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .agent-name {
+        margin-top: 18px;
+        margin-bottom: 8px;
+        color: #032d60;
+      }
+
+      .agent-role {
+        color: #706e6b;
+        font-size: 14px;
+        margin-bottom: 18px;
+      }
+
+      .status-pill {
+        display: inline-block;
+        background: #eef4ff;
+        color: #014486;
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 18px;
+      }
+
+      .intro-text {
+        color: #444;
+        line-height: 1.6;
+        font-size: 14px;
+        margin-bottom: 24px;
+      }
+
+      .prompt-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 24px;
+      }
+
+      .prompt-grid button {
+        border: 1px solid #d8dde6;
+        background: white;
+        color: #032d60;
+        padding: 8px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+
+      .prompt-grid button:hover {
+        background: #eef4ff;
+      }
+
+      .primary-button {
+        width: 100%;
+        border: none;
+        background: #0176d3;
+        color: white;
+        padding: 14px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .primary-button:hover {
+        background: #014486;
+      }
+
+      .primary-button.recording {
+        background: #ba0517;
+      }
+
+      .secondary-button {
+        width: 100%;
+        margin-top: 10px;
+        border: none;
+        background: #2e844a;
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .error-box {
+        margin-bottom: 18px;
+        background: #fef1ee;
+        color: #ba0517;
+        border: 1px solid #ea001e;
+        padding: 12px;
+        border-radius: 8px;
+      }
+    `}</style>
+  </div>
+);
+  
 }
