@@ -23,6 +23,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   const startRecording = async () => {
     try {
@@ -139,48 +140,121 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       if (!response.ok) throw new Error("Speech generation failed");
 
       const audioBlob = await response.blob();
+      console.log("Audio blob received, size:", audioBlob.size, "type:", audioBlob.type);
       const audioUrl = URL.createObjectURL(audioBlob);
       setPendingAudioUrl(audioUrl);
       setShowPlayButton(false);
 
-      await playAudio(audioUrl);
+      await playAudio(audioBlob);
     } catch (error) {
       console.error("Error playing speech:", error);
       setIsSpeaking(false);
     }
   };
 
-  const playAudio = async (audioUrl: string) => {
+  const playAudio = async (audioBlob: Blob) => {
     setIsSpeaking(true);
+    console.log("Playing audio blob, size:", audioBlob.size);
+    console.log("AudioContext state:", audioContextRef.current?.state);
     
     try {
-      // Use Web Audio API with the established AudioContext
-      const response = await fetch(audioUrl);
-      const arrayBuffer = await response.arrayBuffer();
-      const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
+      // Convert blob to array buffer
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      console.log("Array buffer size:", arrayBuffer.byteLength);
       
+      // Decode audio data using the established AudioContext
+      const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
+      console.log("Audio buffer decoded, duration:", audioBuffer.duration, "seconds");
+      console.log("Audio buffer channels:", audioBuffer.numberOfChannels);
+      console.log("Audio buffer sample rate:", audioBuffer.sampleRate);
+      
+      // Check if buffer has actual audio data
+      const channelData = audioBuffer.getChannelData(0);
+      let hasAudio = false;
+      let maxSample = 0;
+      for (let i = 0; i < Math.min(channelData.length, 1000); i++) {
+        if (Math.abs(channelData[i]) > 0.001) {
+          hasAudio = true;
+        }
+        if (Math.abs(channelData[i]) > maxSample) {
+          maxSample = Math.abs(channelData[i]);
+        }
+      }
+      console.log("Buffer has audio data:", hasAudio, "Max sample:", maxSample);
+      
+      // Stop any previous audio source
+      if (audioSourceRef.current) {
+        audioSourceRef.current.stop();
+        audioSourceRef.current.disconnect();
+      }
+      
+      // Create new audio source
       const source = audioContextRef.current!.createBufferSource();
       source.buffer = audioBuffer;
-      source.connect(audioContextRef.current!.destination);
+      audioSourceRef.current = source;
+      
+      // Add gain node for volume control
+      const gainNode = audioContextRef.current!.createGain();
+      gainNode.gain.value = 1.0; // Maximum volume
+      source.connect(gainNode);
+      gainNode.connect(audioContextRef.current!.destination);
+      
+      console.log("Audio chain connected: source -> gain -> destination");
       
       source.onended = () => {
+        console.log("Audio playback ended");
         setIsSpeaking(false);
-        URL.revokeObjectURL(audioUrl);
-        setPendingAudioUrl(null);
+        if (pendingAudioUrl) {
+          URL.revokeObjectURL(pendingAudioUrl);
+          setPendingAudioUrl(null);
+        }
+        audioSourceRef.current = null;
       };
       
       source.start(0);
+      console.log("Audio started playing at time:", audioContextRef.current!.currentTime);
     } catch (error) {
       console.error("Error playing audio:", error);
       setIsSpeaking(false);
       setShowPlayButton(true);
+      audioSourceRef.current = null;
     }
   };
 
-  const playPendingAudio = () => {
+  const playPendingAudio = async () => {
     if (!pendingAudioUrl) return;
     setShowPlayButton(false);
-    playAudio(pendingAudioUrl);
+    
+    try {
+      const response = await fetch(pendingAudioUrl);
+      const audioBlob = await response.blob();
+      await playAudio(audioBlob);
+    } catch (error) {
+      console.error("Error playing pending audio:", error);
+      setIsSpeaking(false);
+    }
+  };
+
+  const handleClose = () => {
+    // Stop any playing audio
+    if (audioSourceRef.current) {
+      audioSourceRef.current.stop();
+      audioSourceRef.current.disconnect();
+      audioSourceRef.current = null;
+    }
+    
+    if (pendingAudioUrl) {
+      URL.revokeObjectURL(pendingAudioUrl);
+      setPendingAudioUrl(null);
+    }
+    setIsSpeaking(false);
+    setIsRecording(false);
+    setShowPlayButton(false);
+    
+    // Call the onClose callback
+    if (onClose) {
+      onClose();
+    }
   };
 
   return (
@@ -201,7 +275,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
         {onClose && (
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="close-btn"
           >
             ×
