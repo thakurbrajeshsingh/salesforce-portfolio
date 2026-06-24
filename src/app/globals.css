@@ -520,16 +520,15 @@ a:focus-visible {
   width: 125px;
   height: 125px;
   border: 1px solid #c5def3;
-  border-radius: 38px;
+  border-radius: 50%;
   background: linear-gradient(145deg, #fff, #e9f5ff);
   box-shadow: 0 18px 45px rgba(1, 118, 211, .18);
-  transform: rotate(45deg);
 }
 
 .pulse-ring {
   position: absolute;
   inset: -8px;
-  border-radius: 38px;
+  border-radius: 50%;
   border: 2px solid var(--blue);
   opacity: 0.5;
   pointer-events: none;
@@ -545,7 +544,7 @@ a:focus-visible {
 
 .profile-core span,
 .profile-core small {
-  transform: rotate(-45deg);
+  transform: none;
 }
 
 .profile-core span {
