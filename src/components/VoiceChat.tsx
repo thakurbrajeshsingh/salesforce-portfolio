@@ -345,14 +345,6 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
               <span className="pulse-ring pulse-ring-3" />
             </>
           )}
-
-          {/* <Image
-            src={aiAvatar}
-            alt="AI Avatar"
-            width={150}
-            className="ai-orb"
-            height={150}
-          /> */}
           <span className="orb-text">
             BK
           </span>
