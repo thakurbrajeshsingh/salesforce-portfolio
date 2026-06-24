@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import aiAvatar from "./agentforce.gif"; // Ensure the path is correct
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -44,13 +42,6 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       microphoneStreamRef.current = stream;
-
-      // Set up audio analyzer for waveform visualization
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      const analyser = audioContextRef.current.createAnalyser();
-      analyser.fftSize = 64;
-      source.connect(analyser);
-      analyserRef.current = analyser;
 
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -179,29 +170,12 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     console.log("AudioContext state:", audioContextRef.current?.state);
 
     try {
-      // Convert blob to array buffer
+      // Try Web Audio API first
       const arrayBuffer = await audioBlob.arrayBuffer();
       console.log("Array buffer size:", arrayBuffer.byteLength);
 
-      // Decode audio data using the established AudioContext
       const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
       console.log("Audio buffer decoded, duration:", audioBuffer.duration, "seconds");
-      console.log("Audio buffer channels:", audioBuffer.numberOfChannels);
-      console.log("Audio buffer sample rate:", audioBuffer.sampleRate);
-
-      // Check if buffer has actual audio data
-      const channelData = audioBuffer.getChannelData(0);
-      let hasAudio = false;
-      let maxSample = 0;
-      for (let i = 0; i < Math.min(channelData.length, 1000); i++) {
-        if (Math.abs(channelData[i]) > 0.001) {
-          hasAudio = true;
-        }
-        if (Math.abs(channelData[i]) > maxSample) {
-          maxSample = Math.abs(channelData[i]);
-        }
-      }
-      console.log("Buffer has audio data:", hasAudio, "Max sample:", maxSample);
 
       // Stop any previous audio source
       if (audioSourceRef.current) {
@@ -209,19 +183,16 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
         audioSourceRef.current.disconnect();
       }
 
-      // Create new audio source
       const source = audioContextRef.current!.createBufferSource();
       source.buffer = audioBuffer;
       audioSourceRef.current = source;
 
-      // Add gain node for volume control
       const gainNode = audioContextRef.current!.createGain();
-      gainNode.gain.value = 1.0; // Maximum volume
+      gainNode.gain.value = 1.0;
       source.connect(gainNode);
       gainNode.connect(audioContextRef.current!.destination);
 
-      console.log("Audio chain connected: source -> gain -> destination");
-      console.log("Destination:", audioContextRef.current!.destination);
+      console.log("Web Audio API: source -> gain -> destination");
 
       source.onended = () => {
         console.log("Audio playback ended");
@@ -234,12 +205,39 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       };
 
       source.start(0);
-      console.log("Audio started playing at time:", audioContextRef.current!.currentTime);
+      console.log("Audio started playing via Web Audio API");
     } catch (error) {
-      console.error("Error playing audio:", error);
-      setIsSpeaking(false);
-      setShowPlayButton(true);
-      audioSourceRef.current = null;
+      console.error("Web Audio API failed, falling back to HTML5 Audio:", error);
+      
+      // Fallback to HTML5 Audio
+      try {
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        
+        audio.onended = () => {
+          console.log("HTML5 Audio playback ended");
+          setIsSpeaking(false);
+          URL.revokeObjectURL(audioUrl);
+          if (pendingAudioUrl) {
+            URL.revokeObjectURL(pendingAudioUrl);
+            setPendingAudioUrl(null);
+          }
+        };
+
+        audio.onerror = (e) => {
+          console.error("HTML5 Audio error:", e);
+          setIsSpeaking(false);
+          setShowPlayButton(true);
+        };
+
+        console.log("Attempting HTML5 Audio play...");
+        await audio.play();
+        console.log("HTML5 Audio started playing");
+      } catch (fallbackError) {
+        console.error("HTML5 Audio also failed:", fallbackError);
+        setIsSpeaking(false);
+        setShowPlayButton(true);
+      }
     }
   };
 
@@ -286,7 +284,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     }
   };
 
-  // Update audio levels from analyzer (recording) or simulate (speaking)
+  // Update audio levels with simulated waveform (both recording and speaking)
   useEffect(() => {
     console.log("Waveform effect triggered, isRecording:", isRecording, "isSpeaking:", isSpeaking);
 
@@ -302,25 +300,9 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     const updateAudioLevels = () => {
       const levels = new Array(20).fill(0);
 
-      if (isRecording && analyserRef.current) {
-        // Use real analyzer data for recording
-        const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-        analyserRef.current.getByteFrequencyData(dataArray);
-
-        for (let i = 0; i < 20; i++) {
-          const startIndex = Math.floor(i * dataArray.length / 20);
-          const endIndex = Math.floor((i + 1) * dataArray.length / 20);
-          let sum = 0;
-          for (let j = startIndex; j < endIndex; j++) {
-            sum += dataArray[j];
-          }
-          levels[i] = sum / (endIndex - startIndex) / 255; // Normalize to 0-1
-        }
-      } else if (isSpeaking) {
-        // Simulate waveform for speaking
-        for (let i = 0; i < 20; i++) {
-          levels[i] = Math.random() * 0.5 + 0.3;
-        }
+      // Simulate waveform for both recording and speaking
+      for (let i = 0; i < 20; i++) {
+        levels[i] = Math.random() * 0.5 + 0.3;
       }
 
       setAudioLevels(levels);
@@ -364,16 +346,16 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
             </>
           )}
 
-          <Image
+          {/* <Image
             src={aiAvatar}
             alt="AI Avatar"
             width={150}
             className="ai-orb"
             height={150}
-          />
-          {/* <span className="orb-text">
+          /> */}
+          <span className="orb-text">
             BK
-          </span> */}
+          </span>
         </div>
         <p className="ai-subtitle">
           My portfolio works for free. My AI twin has cloud bills.
