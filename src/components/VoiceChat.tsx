@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-
+import Image from "next/image";
+import aiAvatar from "./agentforce.gif"; // Ensure the path is correct
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -32,7 +33,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const startRecording = async () => {
     try {
       setError(null);
-      
+
       // Initialize AudioContext on user gesture to enable autoplay later
       if (!audioContextRef.current) {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -40,17 +41,17 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       if (audioContextRef.current.state === 'suspended') {
         await audioContextRef.current.resume();
       }
-      
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       microphoneStreamRef.current = stream;
-      
+
       // Set up audio analyzer for waveform visualization
       const source = audioContextRef.current.createMediaStreamSource(stream);
       const analyser = audioContextRef.current.createAnalyser();
       analyser.fftSize = 64;
       source.connect(analyser);
       analyserRef.current = analyser;
-      
+
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -77,7 +78,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       setIsRecording(false);
-      
+
       // Stop microphone stream and analyzer
       if (microphoneStreamRef.current) {
         microphoneStreamRef.current.getTracks().forEach(track => track.stop());
@@ -176,18 +177,18 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     setIsSpeaking(true);
     console.log("isSpeaking set to true");
     console.log("AudioContext state:", audioContextRef.current?.state);
-    
+
     try {
       // Convert blob to array buffer
       const arrayBuffer = await audioBlob.arrayBuffer();
       console.log("Array buffer size:", arrayBuffer.byteLength);
-      
+
       // Decode audio data using the established AudioContext
       const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
       console.log("Audio buffer decoded, duration:", audioBuffer.duration, "seconds");
       console.log("Audio buffer channels:", audioBuffer.numberOfChannels);
       console.log("Audio buffer sample rate:", audioBuffer.sampleRate);
-      
+
       // Check if buffer has actual audio data
       const channelData = audioBuffer.getChannelData(0);
       let hasAudio = false;
@@ -201,27 +202,27 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
         }
       }
       console.log("Buffer has audio data:", hasAudio, "Max sample:", maxSample);
-      
+
       // Stop any previous audio source
       if (audioSourceRef.current) {
         audioSourceRef.current.stop();
         audioSourceRef.current.disconnect();
       }
-      
+
       // Create new audio source
       const source = audioContextRef.current!.createBufferSource();
       source.buffer = audioBuffer;
       audioSourceRef.current = source;
-      
+
       // Add gain node for volume control
       const gainNode = audioContextRef.current!.createGain();
       gainNode.gain.value = 1.0; // Maximum volume
       source.connect(gainNode);
       gainNode.connect(audioContextRef.current!.destination);
-      
+
       console.log("Audio chain connected: source -> gain -> destination");
       console.log("Destination:", audioContextRef.current!.destination);
-      
+
       source.onended = () => {
         console.log("Audio playback ended");
         setIsSpeaking(false);
@@ -231,7 +232,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
         }
         audioSourceRef.current = null;
       };
-      
+
       source.start(0);
       console.log("Audio started playing at time:", audioContextRef.current!.currentTime);
     } catch (error) {
@@ -245,7 +246,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const playPendingAudio = async () => {
     if (!pendingAudioUrl) return;
     setShowPlayButton(false);
-    
+
     try {
       const response = await fetch(pendingAudioUrl);
       const audioBlob = await response.blob();
@@ -263,13 +264,13 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       audioSourceRef.current.disconnect();
       audioSourceRef.current = null;
     }
-    
+
     // Stop animation
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
-    
+
     if (pendingAudioUrl) {
       URL.revokeObjectURL(pendingAudioUrl);
       setPendingAudioUrl(null);
@@ -278,7 +279,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     setIsRecording(false);
     setShowPlayButton(false);
     setAudioLevels(new Array(20).fill(0));
-    
+
     // Call the onClose callback
     if (onClose) {
       onClose();
@@ -288,7 +289,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   // Update audio levels from analyzer (recording) or simulate (speaking)
   useEffect(() => {
     console.log("Waveform effect triggered, isRecording:", isRecording, "isSpeaking:", isSpeaking);
-    
+
     if (!isRecording && !isSpeaking) {
       setAudioLevels(new Array(20).fill(0));
       if (animationFrameRef.current) {
@@ -336,46 +337,47 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   }, [isRecording, isSpeaking]);
 
   return (
-  <div className="agentforce-wrapper">
-    <div className="agentforce-card">
+    <div className="voice-chat-overlay">
+      {onClose && (
+        <button
+          onClick={handleClose}
+          className="ai-close"
+        >
+          ✕
+        </button>
+      )}
 
-      <div className="agentforce-header">
-        <div className="header-left">
-          <div className="agentforce-icon">✦</div>
-
-          <div>
-            <div className="agentforce-title">Agentforce</div>
-            <div className="agentforce-subtitle">
-              Brajesh AI Assistant
-            </div>
-          </div>
-        </div>
-
-        {onClose && (
-          <button
-            onClick={handleClose}
-            className="close-btn"
-          >
-            ×
-          </button>
-        )}
-      </div>
-
-      <div className="agent-section">
-
-        <div className="avatar-container">
-          <div
-            className={`avatar-circle ${
-              isRecording
-                ? "listening"
-                : isSpeaking
-                ? "speaking"
-                : ""
+      <div className="ai-mode-container">
+        <div
+          className={`ai-orb ${isRecording
+            ? "listening"
+            : isSpeaking
+              ? "speaking"
+              : ""
             }`}
-          >
+        >
+          {(isRecording || isSpeaking) && (
+            <>
+              <span className="pulse-ring pulse-ring-1" />
+              <span className="pulse-ring pulse-ring-2" />
+              <span className="pulse-ring pulse-ring-3" />
+            </>
+          )}
+
+          <Image
+            src={aiAvatar}
+            alt="AI Avatar"
+            width={150}
+            className="ai-orb"
+            height={150}
+          />
+          {/* <span className="orb-text">
             BK
-          </div>
+          </span> */}
         </div>
+        <p className="ai-subtitle">
+          My portfolio works for free. My AI twin has cloud bills.
+        </p>
 
         {(isRecording || isSpeaking) && (
           <div className="waveform-container">
@@ -384,312 +386,92 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
                 key={index}
                 className="waveform-bar"
                 style={{
-                  height: `${Math.max(level * 100, 5)}%`,
-                  backgroundColor: isRecording ? '#0176d3' : '#2e844a',
+                  height: `${Math.max(
+                    level * 100,
+                    8
+                  )}%`,
                 }}
               />
             ))}
           </div>
         )}
 
-        <h2 className="agent-name">
-          Brajesh Kumar
-        </h2>
-
-        <p className="agent-role">
-          😄 The portfolio is free to read... my AI twin isn't. Browse first!
-        </p>
-
-        <div className="status-pill">
-          {isRecording
-            ? "🎤 Listening..."
-            : isLoading
-            ? "⚡ Thinking..."
-            : isSpeaking
-            ? "🔊 Speaking..."
-            : "✓ Ready"}
-        </div>
-
-        {/* <p className="intro-text">
-          Ask me about Salesforce projects,
-          certifications, Field Service,
-          Agentforce, Apex, LWC, and my
-          professional experience.
-        </p>
-
-        <div className="prompt-grid">
-          <button>Projects</button>
-          <button>Agentforce</button>
-          <button>Field Service</button>
-          <button>Certifications</button>
+        {/* <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div className="ai-status">
+            {isRecording
+              ? "🎤 Listening..."
+              : isLoading
+                ? "⚡ Thinking..."
+                : isSpeaking
+                  ? "🔊 Speaking..."
+                  : "Ready to talk"}
+          </div>
         </div> */}
 
         {error && (
-          <div className="error-box">
+          <div
+            style={{
+              marginTop: "1rem",
+              padding: "1rem",
+              borderRadius: "12px",
+              background: "#fef1ee",
+              color: "#ba0517",
+            }}
+          >
             {error}
           </div>
         )}
 
-        <button
-          onClick={
-            isRecording
-              ? stopRecording
-              : startRecording
-          }
-          disabled={isLoading || isSpeaking}
-          className={`primary-button ${
-            isRecording ? "recording" : ""
-          }`}
+        <div
+          style={{
+            marginTop: "2rem",
+            display: "flex",
+            justifyContent: "center",
+          }}
         >
-          {isRecording
-            ? "Stop Recording"
-            : "Start Conversation"}
-        </button>
+          <button
+            onClick={
+              isRecording
+                ? stopRecording
+                : startRecording
+            }
+            disabled={isLoading || isSpeaking}
+            className={`ai-action-btn ${isRecording ? "recording" : ""
+              }`}
+          >
+            {isRecording && "Stop Recording"}
+            {isLoading && "⚡ Thinking..."}
+            {!isLoading && isSpeaking && "Speaking..."}
+            {!isRecording &&
+              !isLoading &&
+              !isSpeaking &&
+              "Start Conversation"}
+          </button>
+        </div>
 
         {showPlayButton &&
           pendingAudioUrl && (
-            <button
-              onClick={playPendingAudio}
-              className="secondary-button"
+            <div
+              style={{
+                marginTop: "1rem",
+                display: "flex",
+                justifyContent: "center",
+              }}
             >
-              Play Response
-            </button>
+              <button
+                onClick={playPendingAudio}
+                className="button-secondary"
+              >
+                Play Response
+              </button>
+            </div>
           )}
       </div>
     </div>
-
-    <style jsx>{`
-      .agentforce-wrapper {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-      }
-
-      .agentforce-card {
-        width: 100%;
-        max-width: 430px;
-        background: #ffffff;
-        border: 1px solid #dddbda;
-        border-radius: 18px;
-        overflow: hidden;
-        box-shadow:
-          0 2px 8px rgba(0,0,0,0.08),
-          0 8px 24px rgba(0,0,0,0.08);
-      }
-
-      .agentforce-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 18px 20px;
-        border-bottom: 1px solid #dddbda;
-        background: #fafaf9;
-      }
-
-      .header-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .agentforce-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
-        background: #0176d3;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-      }
-
-      .agentforce-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #032d60;
-      }
-
-      .agentforce-subtitle {
-        font-size: 12px;
-        color: #706e6b;
-      }
-
-      .close-btn {
-        border: none;
-        background: none;
-        font-size: 22px;
-        color: #706e6b;
-        cursor: pointer;
-      }
-
-      .agent-section {
-        padding: 30px 24px;
-        text-align: center;
-      }
-
-      .avatar-container {
-        display: flex;
-        justify-content: center;
-      }
-
-      .avatar-circle {
-        width: 110px;
-        height: 110px;
-        border-radius: 50%;
-        border: 4px solid #0176d3;
-        background: #eef4ff;
-        color: #032d60;
-        font-size: 30px;
-        font-weight: 700;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .avatar-circle.listening {
-        animation: pulse 1.5s infinite;
-      }
-
-      .avatar-circle.speaking {
-        animation: bounce 1s infinite;
-      }
-
-      .waveform-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 3px;
-        height: 40px;
-        margin: 15px 0;
-      }
-
-      .waveform-bar {
-        width: 4px;
-        border-radius: 2px;
-        transition: height 0.05s ease;
-        min-height: 5px;
-      }
-
-      @keyframes pulse {
-        0% {
-          box-shadow:
-            0 0 0 0 rgba(1,118,211,0.4);
-        }
-
-        100% {
-          box-shadow:
-            0 0 0 28px rgba(1,118,211,0);
-        }
-      }
-
-      @keyframes bounce {
-        0% {
-          transform: scale(1);
-        }
-
-        50% {
-          transform: scale(1.06);
-        }
-
-        100% {
-          transform: scale(1);
-        }
-      }
-
-      .agent-name {
-        margin-top: 18px;
-        margin-bottom: 8px;
-        color: #032d60;
-      }
-
-      .agent-role {
-        color: #706e6b;
-        font-size: 14px;
-        margin-bottom: 18px;
-      }
-
-      .status-pill {
-        display: inline-block;
-        background: #eef4ff;
-        color: #014486;
-        padding: 8px 16px;
-        border-radius: 999px;
-        font-size: 13px;
-        font-weight: 600;
-        margin-bottom: 18px;
-      }
-
-      .intro-text {
-        color: #444;
-        line-height: 1.6;
-        font-size: 14px;
-        margin-bottom: 24px;
-      }
-
-      .prompt-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-        margin-bottom: 24px;
-      }
-
-      .prompt-grid button {
-        border: 1px solid #d8dde6;
-        background: white;
-        color: #032d60;
-        padding: 8px 14px;
-        border-radius: 999px;
-        cursor: pointer;
-        font-size: 13px;
-      }
-
-      .prompt-grid button:hover {
-        background: #eef4ff;
-      }
-
-      .primary-button {
-        width: 100%;
-        border: none;
-        background: #0176d3;
-        color: white;
-        padding: 14px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 700;
-        cursor: pointer;
-      }
-
-      .primary-button:hover {
-        background: #014486;
-      }
-
-      .primary-button.recording {
-        background: #ba0517;
-      }
-
-      .secondary-button {
-        width: 100%;
-        margin-top: 10px;
-        border: none;
-        background: #2e844a;
-        color: white;
-        padding: 12px;
-        border-radius: 8px;
-        cursor: pointer;
-      }
-
-      .error-box {
-        margin-bottom: 18px;
-        background: #fef1ee;
-        color: #ba0517;
-        border: 1px solid #ea001e;
-        padding: 12px;
-        border-radius: 8px;
-      }
-    `}</style>
-  </div>
-);
-  
+  );
 }
