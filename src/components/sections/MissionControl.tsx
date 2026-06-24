@@ -182,17 +182,13 @@ export default function MissionControl({ content }: { content: PortfolioContent 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
             className="voice-chat-overlay"
             onClick={() => setShowVoiceChat(false)}
           >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div onClick={(e) => e.stopPropagation()}>
               <VoiceChat onClose={() => setShowVoiceChat(false)} />
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

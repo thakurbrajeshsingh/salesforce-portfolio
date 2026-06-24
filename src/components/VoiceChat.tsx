@@ -18,7 +18,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const [error, setError] = useState<string | null>(null);
   const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
   const [showPlayButton, setShowPlayButton] = useState(false);
-  const [audioLevels, setAudioLevels] = useState<number[]>(new Array(20).fill(0));
+  const [audioLevel, setAudioLevel] = useState<number>(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -276,7 +276,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     setIsSpeaking(false);
     setIsRecording(false);
     setShowPlayButton(false);
-    setAudioLevels(new Array(20).fill(0));
+    setAudioLevel(0);
 
     // Call the onClose callback
     if (onClose) {
@@ -284,12 +284,12 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     }
   };
 
-  // Update audio levels with simulated waveform (both recording and speaking)
+  // Update audio level from analyzer (recording) or simulate (speaking)
   useEffect(() => {
-    console.log("Waveform effect triggered, isRecording:", isRecording, "isSpeaking:", isSpeaking);
+    console.log("Audio level effect triggered, isRecording:", isRecording, "isSpeaking:", isSpeaking);
 
     if (!isRecording && !isSpeaking) {
-      setAudioLevels(new Array(20).fill(0));
+      setAudioLevel(0);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
@@ -297,19 +297,29 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       return;
     }
 
-    const updateAudioLevels = () => {
-      const levels = new Array(20).fill(0);
+    const updateAudioLevel = () => {
+      let level = 0;
 
-      // Simulate waveform for both recording and speaking
-      for (let i = 0; i < 20; i++) {
-        levels[i] = Math.random() * 0.5 + 0.3;
+      if (isRecording && analyserRef.current) {
+        // Use real analyzer data for recording
+        const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+        analyserRef.current.getByteFrequencyData(dataArray);
+        
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        level = sum / dataArray.length / 255; // Normalize to 0-1
+      } else if (isSpeaking) {
+        // Simulate audio level for speaking
+        level = Math.random() * 0.5 + 0.3;
       }
 
-      setAudioLevels(levels);
-      animationFrameRef.current = requestAnimationFrame(updateAudioLevels);
+      setAudioLevel(level);
+      animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
     };
 
-    animationFrameRef.current = requestAnimationFrame(updateAudioLevels);
+    animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
 
     return () => {
       if (animationFrameRef.current) {
@@ -319,7 +329,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   }, [isRecording, isSpeaking]);
 
   return (
-    <div className="voice-chat-overlay">
+    <>
       {onClose && (
         <button
           onClick={handleClose}
@@ -354,20 +364,13 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
         </p>
 
         {(isRecording || isSpeaking) && (
-          <div className="waveform-container">
-            {audioLevels.map((level, index) => (
-              <div
-                key={index}
-                className="waveform-bar"
-                style={{
-                  height: `${Math.max(
-                    level * 100,
-                    8
-                  )}%`,
-                }}
-              />
-            ))}
-          </div>
+          <div
+            className="audio-glow"
+            style={{
+              opacity: audioLevel * 0.6,
+              boxShadow: `0 0 ${30 + audioLevel * 50}px ${audioLevel * 20}px ${isRecording ? 'rgba(1, 118, 211, 0.4)' : 'rgba(46, 132, 74, 0.4)'}`,
+            }}
+          />
         )}
 
         {/* <div
@@ -446,6 +449,6 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
             </div>
           )}
       </div>
-    </div>
+    </>
   );
 }

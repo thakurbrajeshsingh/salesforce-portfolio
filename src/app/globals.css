@@ -535,6 +535,14 @@ a:focus-visible {
   pointer-events: none;
 }
 
+.audio-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  transition: box-shadow 0.1s ease, opacity 0.1s ease;
+  pointer-events: none;
+}
+
 .profile-core span,
 .profile-core small {
   transform: rotate(-45deg);
