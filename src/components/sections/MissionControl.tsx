@@ -143,6 +143,7 @@ export default function MissionControl({ content }: { content: PortfolioContent 
                   transition={{ duration: 2, repeat: Infinity }}
                 />
                 <span>Brajesh AI</span>
+                <small>Click To Chat</small>
               </motion.div>
               {content.profile.orbitSkills.map((item, index) => (
                 <motion.span
