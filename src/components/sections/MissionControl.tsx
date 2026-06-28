@@ -1,12 +1,20 @@
 "use client";
 
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import AnimatedText from "@/components/ui/AnimatedText";
 import GlassCard from "@/components/ui/GlassCard";
 import Icon from "@/components/ui/Icon";
 import VoiceChat from "@/components/VoiceChat";
+import CountUp from "@/components/ui/CountUp";
 import type { PortfolioContent } from "@/types/content";
+
+const TAGLINES = [
+  "Engineering intelligent Salesforce experiences for real-world operations.",
+  "Integrating Agentforce AI to supercharge enterprise service workflows.",
+  "Developing scalable Apex, LWC, and Flow systems on the Core platform.",
+  "Architecting FSL field operational strategies for global teams."
+];
 
 export default function MissionControl({ content }: { content: PortfolioContent }) {
   const ref = useRef<HTMLElement>(null);
@@ -14,6 +22,14 @@ export default function MissionControl({ content }: { content: PortfolioContent 
   const y = useTransform(scrollYProgress, [0, 1], [0, 120]);
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0.3]);
   const [showVoiceChat, setShowVoiceChat] = useState(false);
+  const [taglineIndex, setTaglineIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTaglineIndex((prev) => (prev + 1) % TAGLINES.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <section id="top" ref={ref} className="hero-section">
@@ -53,14 +69,22 @@ export default function MissionControl({ content }: { content: PortfolioContent 
             <AnimatedText text="Salesforce Universe." as="span" className="hero-line hero-gradient" />
           </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.75, delay: 0.35 }}
-            className="hero-tagline"
-          >
-            {content.profile.tagline}
-          </motion.p>
+          <div style={{ minHeight: "4.5rem", marginTop: "1.55rem" }}>
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={taglineIndex}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.4 }}
+                className="hero-tagline"
+                style={{ margin: 0 }}
+              >
+                {TAGLINES[taglineIndex]}
+              </motion.p>
+            </AnimatePresence>
+          </div>
+
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -132,7 +156,7 @@ export default function MissionControl({ content }: { content: PortfolioContent 
               />
               <motion.div
                 className="profile-core"
-                onClick={() => setShowVoiceChat(true)}
+                onTap={() => setShowVoiceChat(true)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 style={{ cursor: "pointer" }}
@@ -145,20 +169,39 @@ export default function MissionControl({ content }: { content: PortfolioContent 
                 <span>Brajesh AI</span>
                 <small>Click To Chat</small>
               </motion.div>
-              {content.profile.orbitSkills.map((item, index) => (
-                <motion.span
-                  key={item}
-                  className={`orbit-skill orbit-skill-${index + 1}`}
-                  animate={{ y: [0, -6, 0], scale: [1, 1.04, 1] }}
-                  transition={{
-                    duration: 3 + index * 0.35,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                >
-                  {item}
-                </motion.span>
-              ))}
+              {content.profile.orbitSkills.map((item, index) => {
+                const radiusX = 8 + (index % 3) * 2;
+                const radiusY = 6 + (index % 2) * 3;
+                
+                const phases = [
+                  { x: [0, radiusX, 0, -radiusX, 0], y: [-radiusY, 0, radiusY, 0, -radiusY] },
+                  { x: [radiusX, 0, -radiusX, 0, radiusX], y: [0, radiusY, 0, -radiusY, 0] },
+                  { x: [0, -radiusX, 0, radiusX, 0], y: [radiusY, 0, -radiusY, 0, radiusY] },
+                  { x: [-radiusX, 0, radiusX, 0, -radiusX], y: [0, -radiusY, 0, radiusY, 0] },
+                  { x: [radiusX * 0.7, -radiusX * 0.7, -radiusX * 0.7, radiusX * 0.7, radiusX * 0.7], y: [-radiusY * 0.7, -radiusY * 0.7, radiusY * 0.7, radiusY * 0.7, -radiusY * 0.7] }
+                ];
+                
+                const motionPath = phases[index % phases.length];
+
+                return (
+                  <motion.span
+                    key={item}
+                    className={`orbit-skill orbit-skill-${index + 1}`}
+                    animate={{
+                      x: motionPath.x,
+                      y: motionPath.y,
+                      scale: [1, 1.05, 1],
+                    }}
+                    transition={{
+                      duration: 8 + index * 2.2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    {item}
+                  </motion.span>
+                );
+              })}
             </div>
             <div className="metric-grid">
               {content.metrics.map((metric, index) => (
@@ -168,7 +211,9 @@ export default function MissionControl({ content }: { content: PortfolioContent 
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 + index * 0.1 }}
                 >
-                  <strong>{metric.value}</strong>
+                  <strong>
+                    <CountUp value={metric.value} />
+                  </strong>
                   <span>{metric.label}</span>
                 </motion.div>
               ))}
@@ -193,6 +238,24 @@ export default function MissionControl({ content }: { content: PortfolioContent 
           </motion.div>
         )}
       </AnimatePresence>
+
+      <motion.div
+        className="scroll-indicator"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0.9, 0.9, 0] }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2
+        }}
+        aria-hidden="true"
+      >
+        <span className="scroll-indicator-mouse">
+          <span className="scroll-indicator-wheel" />
+        </span>
+        <span className="scroll-indicator-arrow" />
+      </motion.div>
     </section>
   );
 }

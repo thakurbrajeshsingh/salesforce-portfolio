@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Icon from "@/components/ui/Icon";
-import { accentClass } from "@/lib/utils";
+import { accentClass, handleCardMouseMove } from "@/lib/utils";
 import type { LabStatus, PortfolioContent } from "@/types/content";
 
 const FILTERS: Array<LabStatus | "All"> = ["All", "Deployed", "Prototype", "Exploring"];
@@ -44,6 +44,7 @@ export default function AILab({ content }: { content: PortfolioContent }) {
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
+                onMouseMove={handleCardMouseMove}
                 whileHover={{ y: -4 }}
                 className={`lab-card ${accentClass(item.accent)}`}
               >

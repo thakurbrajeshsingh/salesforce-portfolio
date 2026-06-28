@@ -27,6 +27,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const microphoneStreamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const barsRef = useRef<HTMLDivElement[]>([]);
 
   const startRecording = async () => {
     try {
@@ -34,7 +35,11 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
       // Initialize AudioContext on user gesture to enable autoplay later
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+        if (!AudioContextClass) {
+          throw new Error("Web Audio API not supported");
+        }
+        audioContextRef.current = new AudioContextClass();
       }
       if (audioContextRef.current.state === 'suspended') {
         await audioContextRef.current.resume();
@@ -42,6 +47,13 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       microphoneStreamRef.current = stream;
+
+      // Set up Web Audio Analyser for real-time visualization
+      const sourceNode = audioContextRef.current.createMediaStreamSource(stream);
+      const analyser = audioContextRef.current.createAnalyser();
+      analyser.fftSize = 64; // Gives 32 frequency bins
+      sourceNode.connect(analyser);
+      analyserRef.current = analyser;
 
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -284,15 +296,21 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     }
   };
 
-  // Update audio level from analyzer (recording) or simulate (speaking)
+  // Update audio level from analyzer (recording) or simulate (speaking, loading)
   useEffect(() => {
-    console.log("Audio level effect triggered, isRecording:", isRecording, "isSpeaking:", isSpeaking);
-
-    if (!isRecording && !isSpeaking) {
-      setAudioLevel(0);
+    if (!isRecording && !isSpeaking && !isLoading) {
+      requestAnimationFrame(() => {
+        setAudioLevel(0);
+      });
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
+      }
+      for (let i = 0; i < 20; i++) {
+        const barEl = barsRef.current[i];
+        if (barEl) {
+          barEl.style.height = "10%";
+        }
       }
       return;
     }
@@ -301,18 +319,43 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       let level = 0;
 
       if (isRecording && analyserRef.current) {
-        // Use real analyzer data for recording
         const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
         analyserRef.current.getByteFrequencyData(dataArray);
         
         let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-          sum += dataArray[i];
+        for (let i = 0; i < 20; i++) {
+          const val = (dataArray[i] || 0) / 255;
+          sum += dataArray[i] || 0;
+          
+          const barEl = barsRef.current[i];
+          if (barEl) {
+            const heightPct = 10 + val * 90;
+            barEl.style.height = `${heightPct}%`;
+          }
         }
-        level = sum / dataArray.length / 255; // Normalize to 0-1
+        level = sum / 20 / 255;
       } else if (isSpeaking) {
-        // Simulate audio level for speaking
-        level = Math.random() * 0.5 + 0.3;
+        level = Math.random() * 0.4 + 0.4;
+        for (let i = 0; i < 20; i++) {
+          const barEl = barsRef.current[i];
+          if (barEl) {
+            const time = Date.now() * 0.007;
+            const wave = Math.sin(time + i * 0.4) * 0.5 + 0.5;
+            const noise = Math.random() * 0.15;
+            const heightPct = 10 + Math.min(1, wave * level + noise) * 90;
+            barEl.style.height = `${heightPct}%`;
+          }
+        }
+      } else if (isLoading) {
+        for (let i = 0; i < 20; i++) {
+          const barEl = barsRef.current[i];
+          if (barEl) {
+            const time = Date.now() * 0.006;
+            const wave = Math.sin(time - i * 0.4) * 0.5 + 0.5;
+            const heightPct = 12 + wave * 40;
+            barEl.style.height = `${heightPct}%`;
+          }
+        }
       }
 
       setAudioLevel(level);
@@ -326,7 +369,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isRecording, isSpeaking]);
+  }, [isRecording, isSpeaking, isLoading]);
 
   return (
     <>
@@ -362,6 +405,19 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
         <p className="ai-subtitle">
           My portfolio works for free. My AI twin has cloud bills.
         </p>
+
+        <div className="waveform-container" aria-hidden="true">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                if (el) barsRef.current[i] = el;
+              }}
+              className="waveform-bar"
+              style={{ height: "10%" }}
+            />
+          ))}
+        </div>
 
         {(isRecording || isSpeaking) && (
           <div

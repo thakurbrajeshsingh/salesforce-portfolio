@@ -5,8 +5,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
 import { revealTransition } from "@/lib/animations";
-import { accentClass } from "@/lib/utils";
+import { accentClass, handleCardMouseMove } from "@/lib/utils";
 import type { PortfolioContent } from "@/types/content";
+import CountUp from "@/components/ui/CountUp";
 
 export default function ProjectGalaxy({ content }: { content: PortfolioContent }) {
   const [active, setActive] = useState(content.projects[0].id);
@@ -30,7 +31,8 @@ explore the systems, decisions, and outcomes behind the work."
                 delay={index * 0.08}
                 transition={{ ...revealTransition, delay: index * 0.08 }}
                 className={`project-card ${accentClass(project.accent)} ${expanded ? "expanded" : ""}`}
-                onClick={() => setActive(project.id)}
+                onTap={() => setActive(project.id)}
+                onMouseMove={handleCardMouseMove}
                 whileHover={{ y: -6 }}
                 layout
               >
@@ -42,7 +44,9 @@ explore the systems, decisions, and outcomes behind the work."
                 <div className="project-metrics">
                   {project.metrics.map((metric) => (
                     <div key={metric.label}>
-                      <strong>{metric.value}</strong>
+                      <strong>
+                        <CountUp value={metric.value} />
+                      </strong>
                       <span>{metric.label}</span>
                     </div>
                   ))}
