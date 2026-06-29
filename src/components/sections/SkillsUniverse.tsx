@@ -23,7 +23,7 @@ export default function SkillsUniverse({ content }: { content: PortfolioContent 
             {content.skillGroups.map((group) => (
               <motion.button
                 key={group.id}
-                onTap={() => setActive(group.id)}
+                onClick={() => setActive(group.id)}
                 className={`skill-group ${accentClass(group.accent)} ${active === group.id ? "active" : ""}`}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}

@@ -1,7 +1,6 @@
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
 import { revealTransition } from "@/lib/animations";
-import { handleCardMouseMove } from "@/lib/utils";
 import type { PortfolioContent } from "@/types/content";
 
 export default function Awards({ content }: { content: PortfolioContent }) {
@@ -21,7 +20,6 @@ export default function Awards({ content }: { content: PortfolioContent }) {
               delay={index * 0.1}
               transition={{ ...revealTransition, delay: index * 0.1 }}
               className="award-card"
-              onMouseMove={handleCardMouseMove}
               whileHover={{ y: -4 }}
             >
               <span className="award-number">{String(index + 1).padStart(2, "0")}</span>

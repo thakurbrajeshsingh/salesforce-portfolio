@@ -18,11 +18,6 @@ export default function PortfolioSite({ content }: { content: PortfolioContent }
     <div className="portfolio-shell">
       <ScrollProgress />
       <div className="ambient-grid" aria-hidden="true" />
-      <div className="ambient-orbs" aria-hidden="true">
-        <div className="ambient-orb ambient-orb-1" />
-        <div className="ambient-orb ambient-orb-2" />
-        <div className="ambient-orb ambient-orb-3" />
-      </div>
       <Header content={content} />
       <main>
         <MissionControl content={content} />

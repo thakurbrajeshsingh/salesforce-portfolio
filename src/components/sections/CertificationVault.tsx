@@ -2,7 +2,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
 import Icon from "@/components/ui/Icon";
 import { revealTransition } from "@/lib/animations";
-import { accentClass, handleCardMouseMove } from "@/lib/utils";
+import { accentClass } from "@/lib/utils";
 import type { PortfolioContent } from "@/types/content";
 
 export default function CertificationVault({ content }: { content: PortfolioContent }) {
@@ -22,7 +22,6 @@ export default function CertificationVault({ content }: { content: PortfolioCont
               delay={index * 0.08}
               transition={{ ...revealTransition, delay: index * 0.08 }}
               className={`vault-card ${accentClass(certification.accent)}`}
-              onMouseMove={handleCardMouseMove}
               whileHover={{ y: -4 }}
             >
               <div className="vault-seal">

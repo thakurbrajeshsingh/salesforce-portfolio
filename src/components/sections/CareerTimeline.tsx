@@ -25,7 +25,7 @@ export default function CareerTimeline({ content }: { content: PortfolioContent 
             {content.experience.map((experience, index) => (
               <motion.button
                 key={experience.id}
-                onTap={() => setActive(index)}
+                onClick={() => setActive(index)}
                 className={index === active ? "timeline-node active" : "timeline-node"}
                 whileHover={{ x: 4 }}
                 whileTap={{ scale: 0.98 }}

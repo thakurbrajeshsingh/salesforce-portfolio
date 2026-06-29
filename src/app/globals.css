@@ -96,11 +96,6 @@ a:focus-visible {
 .site-header-scrolled {
   box-shadow: 0 8px 32px rgba(11, 31, 54, .06);
   background: rgba(247, 250, 253, .94);
-  backdrop-filter: blur(30px) saturate(170%);
-}
-
-.site-header-scrolled .site-header-inner {
-  height: 54px;
 }
 
 .glass-card {
@@ -179,7 +174,6 @@ a:focus-visible {
   border-bottom: 1px solid rgba(205, 220, 235, .78);
   background: rgba(247, 250, 253, .82);
   backdrop-filter: blur(22px) saturate(160%);
-  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
 }
 
 .site-header-inner {
@@ -189,7 +183,6 @@ a:focus-visible {
   display: flex;
   align-items: center;
   gap: 2rem;
-  transition: height 0.3s ease;
 }
 
 .brand-lockup {
@@ -698,30 +691,6 @@ a:focus-visible {
   left: 13px;
   width: 1px;
   background: linear-gradient(var(--blue), var(--cyan), var(--green));
-}
-
-.timeline-rail::after {
-  content: "";
-  position: absolute;
-  top: 24px;
-  bottom: 24px;
-  left: 12px;
-  width: 3px;
-  background: linear-gradient(to bottom, transparent, var(--blue), var(--cyan), transparent) no-repeat;
-  background-size: 100% 120px;
-  background-position: 0 -120px;
-  animation: travel-pulse 6s infinite linear;
-  pointer-events: none;
-  will-change: background-position;
-}
-
-@keyframes travel-pulse {
-  0% {
-    background-position: 0 -120px;
-  }
-  100% {
-    background-position: 0 calc(100% + 120px);
-  }
 }
 
 .timeline-node {
@@ -1906,242 +1875,5 @@ BRAJESH AI MODE - SALESFORCE GLASSMORPHISM
   100% {
     transform: translate(-50%, -50%) scale(1.15);
     opacity: 0;
-  }
-}
-
-/* ==========================================
-PREMIUM ANIMATIONS AND HOVER EFFECTS
-========================================== */
-
-/* Custom scrollbar for modern browsers */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--page);
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbdcf0;
-  border-radius: 99px;
-  border: 2.5px solid var(--page);
-  transition: background 0.3s;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a1b8d2;
-}
-
-/* Card Local Mouse Spotlight Glow */
-.project-card::after,
-.vault-card::before,
-.lab-card::after,
-.award-card::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: radial-gradient(
-    circle 240px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(1, 118, 211, 0.08),
-    transparent 80%
-  );
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  z-index: 1;
-}
-
-.project-card:hover::after,
-.vault-card:hover::before,
-.lab-card:hover::after,
-.award-card:hover::after {
-  opacity: 1;
-}
-
-/* Primary Button Sweeping Light Shine */
-.button-primary {
-  position: relative;
-  overflow: hidden;
-}
-
-.button-primary::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.22),
-    transparent
-  );
-  pointer-events: none;
-}
-
-.button-primary:hover::after {
-  left: 100%;
-  transition: left 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Ambient Floating Background Orbs */
-.ambient-orbs {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-  opacity: 0.7;
-}
-
-.ambient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(130px);
-  opacity: 0.16;
-  animation: drift 20s infinite alternate ease-in-out;
-}
-
-.ambient-orb-1 {
-  top: 8%;
-  left: 5%;
-  width: 520px;
-  height: 520px;
-  background: radial-gradient(circle, var(--blue), transparent);
-  animation-duration: 26s;
-}
-
-.ambient-orb-2 {
-  bottom: 12%;
-  right: 8%;
-  width: 650px;
-  height: 650px;
-  background: radial-gradient(circle, var(--violet), transparent);
-  animation-duration: 38s;
-  animation-delay: -6s;
-}
-
-.ambient-orb-3 {
-  top: 45%;
-  left: 40%;
-  width: 480px;
-  height: 480px;
-  background: radial-gradient(circle, var(--cyan), transparent);
-  animation-duration: 32s;
-  animation-delay: -12s;
-}
-
-@keyframes drift {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(70px, -50px) scale(1.1);
-  }
-  100% {
-    transform: translate(-40px, 80px) scale(0.95);
-  }
-}
-
-/* Native CSS Scroll-driven header animations */
-@media (prefers-reduced-motion: no-preference) {
-  @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
-    @keyframes shrink-header-bg {
-      to {
-        background: rgba(245, 248, 252, 0.96);
-        border-bottom-color: rgba(205, 220, 235, 0.95);
-        box-shadow: 0 8px 32px rgba(11, 31, 54, 0.05);
-        backdrop-filter: blur(30px) saturate(170%);
-      }
-    }
-    @keyframes shrink-header-height {
-      to {
-        height: 54px;
-      }
-    }
-    .site-header {
-      animation: shrink-header-bg auto linear both;
-      animation-timeline: scroll(block root);
-      animation-range: 0px 80px;
-    }
-    .site-header-inner {
-      animation: shrink-header-height auto linear both;
-      animation-timeline: scroll(block root);
-      animation-range: 0px 80px;
-    }
-  }
-}
-
-/* Scroll Down Indicator */
-.scroll-indicator {
-  position: absolute;
-  bottom: 2.2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.45rem;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.scroll-indicator-mouse {
-  width: 20px;
-  height: 32px;
-  border: 2px solid var(--muted);
-  border-radius: 10px;
-  position: relative;
-  opacity: 0.75;
-}
-
-.scroll-indicator-wheel {
-  width: 3px;
-  height: 7px;
-  background: var(--blue);
-  border-radius: 99px;
-  position: absolute;
-  top: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: scroll-wheel 1.6s infinite ease-in-out;
-}
-
-.scroll-indicator-arrow {
-  width: 7px;
-  height: 7px;
-  border-right: 2px solid var(--muted);
-  border-bottom: 2px solid var(--muted);
-  transform: rotate(45deg);
-  opacity: 0.55;
-  animation: scroll-arrow 1.6s infinite ease-in-out;
-}
-
-@keyframes scroll-wheel {
-  0% {
-    top: 5px;
-    opacity: 1;
-  }
-  100% {
-    top: 15px;
-    opacity: 0;
-  }
-}
-
-@keyframes scroll-arrow {
-  0% {
-    transform: rotate(45deg) translate(-2px, -2px);
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 0.9;
-  }
-  100% {
-    transform: rotate(45deg) translate(2px, 2px);
-    opacity: 0.3;
   }
 }
