@@ -1807,7 +1807,7 @@ BRAJESH AI MODE - SALESFORCE GLASSMORPHISM
 
 .pulse-ring {
   position: absolute;
-  inset: 0;
+  inset: 10px;
 
   border-radius: 50%;
 
@@ -1831,14 +1831,14 @@ BRAJESH AI MODE - SALESFORCE GLASSMORPHISM
   }
 
   100% {
-    transform: scale(1.4);
+    transform: scale(1.15);
     opacity: 0;
   }
 }
 
 .ai-orb {
   position: relative;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .ai-orb.speaking {

@@ -19,11 +19,13 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
   const [showPlayButton, setShowPlayButton] = useState(false);
   const [audioLevel, setAudioLevel] = useState<number>(0);
+  const [hasGreeted, setHasGreeted] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const microphoneStreamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -38,6 +40,14 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       }
       if (audioContextRef.current.state === 'suspended') {
         await audioContextRef.current.resume();
+      }
+
+      // If this is the first interaction, greet and ask for name
+      if (!hasGreeted) {
+        const greeting = "Hello! I'm Brajesh AI, the professional twin of Brajesh Kumar. May I know your name?";
+        setHasGreeted(true);
+        await speakText(greeting);
+        return;
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -142,13 +152,18 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
   const speakText = async (text: string) => {
     try {
+      console.log("Speaking text:", text);
       const response = await fetch("/api/voice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
 
-      if (!response.ok) throw new Error("Speech generation failed");
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Speech generation failed:", errorData);
+        throw new Error("Speech generation failed");
+      }
 
       const audioBlob = await response.blob();
       console.log("Audio blob received, size:", audioBlob.size, "type:", audioBlob.type);
@@ -160,6 +175,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     } catch (error) {
       console.error("Error playing speech:", error);
       setIsSpeaking(false);
+      setError("Failed to play audio. Please try again.");
     }
   };
 
@@ -167,77 +183,40 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     console.log("playAudio called with blob size:", audioBlob.size);
     setIsSpeaking(true);
     console.log("isSpeaking set to true");
-    console.log("AudioContext state:", audioContextRef.current?.state);
 
     try {
-      // Try Web Audio API first
-      const arrayBuffer = await audioBlob.arrayBuffer();
-      console.log("Array buffer size:", arrayBuffer.byteLength);
-
-      const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer);
-      console.log("Audio buffer decoded, duration:", audioBuffer.duration, "seconds");
-
-      // Stop any previous audio source
-      if (audioSourceRef.current) {
-        audioSourceRef.current.stop();
-        audioSourceRef.current.disconnect();
-      }
-
-      const source = audioContextRef.current!.createBufferSource();
-      source.buffer = audioBuffer;
-      audioSourceRef.current = source;
-
-      const gainNode = audioContextRef.current!.createGain();
-      gainNode.gain.value = 1.0;
-      source.connect(gainNode);
-      gainNode.connect(audioContextRef.current!.destination);
-
-      console.log("Web Audio API: source -> gain -> destination");
-
-      source.onended = () => {
+      // Use HTML5 Audio directly as it's more reliable for simple playback
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audioElementRef.current = audio;
+      
+      audio.onended = () => {
         console.log("Audio playback ended");
         setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        audioElementRef.current = null;
         if (pendingAudioUrl) {
           URL.revokeObjectURL(pendingAudioUrl);
           setPendingAudioUrl(null);
         }
-        audioSourceRef.current = null;
       };
 
-      source.start(0);
-      console.log("Audio started playing via Web Audio API");
-    } catch (error) {
-      console.error("Web Audio API failed, falling back to HTML5 Audio:", error);
-      
-      // Fallback to HTML5 Audio
-      try {
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        
-        audio.onended = () => {
-          console.log("HTML5 Audio playback ended");
-          setIsSpeaking(false);
-          URL.revokeObjectURL(audioUrl);
-          if (pendingAudioUrl) {
-            URL.revokeObjectURL(pendingAudioUrl);
-            setPendingAudioUrl(null);
-          }
-        };
-
-        audio.onerror = (e) => {
-          console.error("HTML5 Audio error:", e);
-          setIsSpeaking(false);
-          setShowPlayButton(true);
-        };
-
-        console.log("Attempting HTML5 Audio play...");
-        await audio.play();
-        console.log("HTML5 Audio started playing");
-      } catch (fallbackError) {
-        console.error("HTML5 Audio also failed:", fallbackError);
+      audio.onerror = (e) => {
+        console.error("Audio error:", e);
         setIsSpeaking(false);
+        audioElementRef.current = null;
         setShowPlayButton(true);
-      }
+      };
+
+      console.log("Attempting audio play...");
+      await audio.play();
+      console.log("Audio started playing");
+    } catch (error) {
+      console.error("Audio playback failed:", error);
+      setIsSpeaking(false);
+      audioElementRef.current = null;
+      setShowPlayButton(true);
+      setError("Failed to play audio. Please try again.");
     }
   };
 
@@ -257,6 +236,12 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
   const handleClose = () => {
     // Stop any playing audio
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current.currentTime = 0;
+      audioElementRef.current = null;
+    }
+
     if (audioSourceRef.current) {
       audioSourceRef.current.stop();
       audioSourceRef.current.disconnect();
@@ -427,7 +412,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
             {!isRecording &&
               !isLoading &&
               !isSpeaking &&
-              "Start Conversation"}
+              (hasGreeted ? "Continue Conversation" : "Start Conversation")}
           </button>
         </div>
 
