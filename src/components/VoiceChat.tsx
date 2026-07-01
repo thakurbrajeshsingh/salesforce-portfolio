@@ -20,6 +20,8 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const [showPlayButton, setShowPlayButton] = useState(false);
   const [audioLevel, setAudioLevel] = useState<number>(0);
   const [hasGreeted, setHasGreeted] = useState(false);
+  const [isContinuousMode, setIsContinuousMode] = useState(false);
+  const [isGreeting, setIsGreeting] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -29,10 +31,21 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const microphoneStreamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const greetingInProgressRef = useRef(false);
+  const greetingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasGreetedRef = useRef(false);
+  const startRecordingInProgressRef = useRef(false);
 
   const startRecording = async () => {
+    // Prevent multiple simultaneous calls
+    if (startRecordingInProgressRef.current) {
+      console.log("startRecording already in progress, skipping");
+      return;
+    }
+
     try {
       setError(null);
+      startRecordingInProgressRef.current = true;
 
       // Initialize AudioContext on user gesture to enable autoplay later
       if (!audioContextRef.current) {
@@ -43,10 +56,20 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
       }
 
       // If this is the first interaction, greet and ask for name
-      if (!hasGreeted) {
-        const greeting = "Hello! I'm Brajesh AI, the professional twin of Brajesh Kumar. May I know your name?";
+      if (!hasGreetedRef.current && !greetingInProgressRef.current) {
+        greetingInProgressRef.current = true;
+        setIsGreeting(true);
+        hasGreetedRef.current = true;
         setHasGreeted(true);
+        const greeting = "Hello! I'm Brajesh AI, the professional twin of Brajesh Kumar. May I know your name?";
         await speakText(greeting);
+        setIsGreeting(false);
+        greetingInProgressRef.current = false;
+        // Auto-start recording after greeting
+        if (greetingTimeoutRef.current) {
+          clearTimeout(greetingTimeoutRef.current);
+        }
+        greetingTimeoutRef.current = setTimeout(() => startRecording(), 500);
         return;
       }
 
@@ -71,6 +94,8 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     } catch (error) {
       console.error("Error accessing microphone:", error);
       setError("Microphone access denied. Please allow microphone access.");
+    } finally {
+      startRecordingInProgressRef.current = false;
     }
   };
 
@@ -151,6 +176,12 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   };
 
   const speakText = async (text: string) => {
+    // Prevent multiple simultaneous audio playbacks
+    if (isSpeaking) {
+      console.log("Already speaking, skipping new audio");
+      return;
+    }
+
     try {
       console.log("Speaking text:", text);
       const response = await fetch("/api/voice", {
@@ -198,6 +229,10 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
         if (pendingAudioUrl) {
           URL.revokeObjectURL(pendingAudioUrl);
           setPendingAudioUrl(null);
+        }
+        // Auto-start recording in continuous mode
+        if (isContinuousMode) {
+          setTimeout(() => startRecording(), 500);
         }
       };
 
@@ -394,26 +429,31 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
             marginTop: "2rem",
             display: "flex",
             justifyContent: "center",
+            gap: "1rem",
           }}
         >
-          <button
-            onClick={
-              isRecording
-                ? stopRecording
-                : startRecording
-            }
-            disabled={isLoading || isSpeaking}
-            className={`ai-action-btn ${isRecording ? "recording" : ""
-              }`}
-          >
-            {isRecording && "Stop Recording"}
-            {isLoading && "⚡ Thinking..."}
-            {!isLoading && isSpeaking && "Speaking..."}
-            {!isRecording &&
-              !isLoading &&
-              !isSpeaking &&
-              (hasGreeted ? "Continue Conversation" : "Start Conversation")}
-          </button>
+          {isRecording ? (
+            <button
+              onClick={stopRecording}
+              className="ai-action-btn recording"
+            >
+              Stop Recording
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setIsContinuousMode(true);
+                startRecording();
+              }}
+              disabled={isLoading || isSpeaking || isGreeting}
+              className="ai-action-btn"
+            >
+              {isLoading && "⚡ Thinking..."}
+              {!isLoading && isSpeaking && "Speaking..."}
+              {!isLoading && !isSpeaking && "Start Conversation"}
+            </button>
+          )}
+
         </div>
 
         {showPlayButton &&
