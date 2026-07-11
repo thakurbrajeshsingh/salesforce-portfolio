@@ -1,10 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PortfolioSite from "@/components/portfolio/PortfolioSite";
 import VoiceChat from "@/components/VoiceChat";
 import { getPortfolioContent } from "@/lib/data";
+
+function ModeButton({ icon, label, onClick, variant, delay }: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  variant: "normal" | "ai";
+  delay: number;
+}) {
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay }}
+      whileHover={{ scale: 1.05, y: -5 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className={`clean-mode-button ${variant}`}
+    >
+      <div className="clean-button-icon">
+        {icon}
+      </div>
+      <span className="clean-button-label">{label}</span>
+    </motion.button>
+  );
+}
 
 export default function Home() {
   const [mode, setMode] = useState<"selection" | "normal" | "ai">("selection");
@@ -38,72 +63,53 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.5 }}
             className="mode-overlay"
           >
             <div className="mode-overlay-content">
-              <motion.h1
-                initial={{ opacity: 0, y: -20 }}
+              <motion.div
+                initial={{ opacity: 0, y: -40 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="mode-overlay-title"
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="clean-logo"
               >
-                Welcome to Brajesh's Portfolio
-              </motion.h1>
-              
+                BK
+              </motion.div>
+
               <motion.p
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="mode-overlay-subtitle"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="clean-subtitle"
               >
-                Choose how you'd like to explore
+                Welcome to my portfolio
               </motion.p>
 
-              <div className="mode-buttons-grid">
-                <motion.button
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setMode("normal")}
-                  className="mode-button normal-mode"
-                >
-                  <span className="mode-button-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="clean-buttons-container">
+                <ModeButton
+                  icon={
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                       <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" y1="13" x2="8" y2="13"></line>
-                      <line x1="16" y1="17" x2="8" y2="17"></line>
-                      <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
-                  </span>
-                  <div className="mode-button-content">
-                    <h3>Normal Mode</h3>
-                    <p>Browse the traditional portfolio</p>
-                  </div>
-                </motion.button>
+                  }
+                  label="Browse Portfolio"
+                  onClick={() => setMode("normal")}
+                  variant="normal"
+                  delay={0.6}
+                />
 
-                <motion.button
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setMode("ai")}
-                  className="mode-button ai-mode"
-                >
-                  <span className="mode-button-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <ModeButton
+                  icon={
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
-                  </span>
-                  <div className="mode-button-content">
-                    <h3>AI Mode</h3>
-                    <p>Talk with Brajesh AI</p>
-                  </div>
-                </motion.button>
+                  }
+                  label="Talk with AI"
+                  onClick={() => setMode("ai")}
+                  variant="ai"
+                  delay={0.8}
+                />
               </div>
             </div>
           </motion.div>
@@ -111,12 +117,25 @@ export default function Home() {
       </AnimatePresence>
 
       {mode === "ai" && (
-        <div className="ai-mode-fullscreen">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="ai-mode-fullscreen"
+        >
           <VoiceChat onClose={() => setMode("selection")} />
-        </div>
+        </motion.div>
       )}
 
-      {mode === "normal" && <PortfolioSite content={content} />}
+      {mode === "normal" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          <PortfolioSite content={content} />
+        </motion.div>
+      )}
     </>
   );
 }
