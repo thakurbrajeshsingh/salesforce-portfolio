@@ -28,12 +28,7 @@ export const metadata: Metadata = {
     "Data Cloud",
   ],
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
-    ],
+    icon: "/favicon.svg",
   },
   openGraph: {
     title: "Brajesh Kumar | Salesforce Developer",
