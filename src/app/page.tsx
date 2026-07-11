@@ -82,7 +82,7 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="clean-subtitle"
               >
-                Welcome to my portfolio
+                Where code meets creativity ✨
               </motion.p>
 
               <div className="clean-buttons-container">
@@ -93,7 +93,7 @@ export default function Home() {
                       <polyline points="14 2 14 8 20 8"></polyline>
                     </svg>
                   }
-                  label="Browse Portfolio"
+                  label="The Classic Way 📄"
                   onClick={() => setMode("normal")}
                   variant="normal"
                   delay={0.6}
@@ -105,7 +105,7 @@ export default function Home() {
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
                   }
-                  label="Talk with AI"
+                  label="Chat with AI Bot 🤖"
                   onClick={() => setMode("ai")}
                   variant="ai"
                   delay={0.8}
