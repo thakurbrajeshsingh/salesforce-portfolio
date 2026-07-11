@@ -27,6 +27,14 @@ export const metadata: Metadata = {
     "Agentforce",
     "Data Cloud",
   ],
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
+    ],
+  },
   openGraph: {
     title: "Brajesh Kumar | Salesforce Developer",
     description: "Explore Brajesh Kumar's Salesforce expertise, certifications, project impact, and Agentforce journey.",
