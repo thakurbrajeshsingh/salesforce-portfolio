@@ -67,14 +67,14 @@ export default function Home() {
             className="mode-overlay"
           >
             <div className="mode-overlay-content">
-              <motion.div
+              <motion.h1
                 initial={{ opacity: 0, y: -40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="clean-logo"
+                className="clean-welcome"
               >
-                BK
-              </motion.div>
+                👋 Hey, you made it!
+              </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0 }}
@@ -82,7 +82,7 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="clean-subtitle"
               >
-                Where code meets creativity ✨
+               One button leads to documents. The other lets me do the talking. Your move. 😏
               </motion.p>
 
               <div className="clean-buttons-container">
@@ -93,7 +93,7 @@ export default function Home() {
                       <polyline points="14 2 14 8 20 8"></polyline>
                     </svg>
                   }
-                  label="The Classic Way 📄"
+                  label="📄 I'm feeling old-school"
                   onClick={() => setMode("normal")}
                   variant="normal"
                   delay={0.6}
@@ -105,7 +105,7 @@ export default function Home() {
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
                   }
-                  label="Chat with AI Bot 🤖"
+                  label="🤖 AI Mode"
                   onClick={() => setMode("ai")}
                   variant="ai"
                   delay={0.8}

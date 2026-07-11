@@ -2016,8 +2016,8 @@ BRAJESH AI MODE - SALESFORCE GLASSMORPHISM
     max-width: 300px;
   }
   
-  .clean-logo {
-    font-size: 4rem;
+  .clean-welcome {
+    font-size: 3rem;
   }
   
   .clean-subtitle {
@@ -2039,8 +2039,8 @@ BRAJESH AI MODE - SALESFORCE GLASSMORPHISM
 }
 
 @media (max-width: 480px) {
-  .clean-logo {
-    font-size: 3rem;
+  .clean-welcome {
+    font-size: 2.5rem;
   }
   
   .clean-subtitle {
@@ -2153,17 +2153,18 @@ BRAJESH AI MODE - SALESFORCE GLASSMORPHISM
   letter-spacing: -0.01em;
 }
 
-.clean-logo {
-  font-size: 5rem;
-  font-weight: 900;
+.clean-welcome {
+  font-size: 4rem;
+  font-weight: 800;
   background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 50%, var(--violet) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: gradientShift 4s ease-in-out infinite;
-  margin-bottom: 1rem;
-  letter-spacing: -0.05em;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .clean-subtitle {
@@ -2171,7 +2172,7 @@ BRAJESH AI MODE - SALESFORCE GLASSMORPHISM
   color: var(--muted);
   font-weight: 500;
   letter-spacing: 0.02em;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 /* AI Mode Fullscreen */
