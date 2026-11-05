@@ -20,11 +20,13 @@ export const metadata: Metadata = {
   description:
     "Salesforce Developer specializing in Field Service, Service Cloud, Apex, LWC, Flow, enterprise utility delivery, and a growing Agentforce practice.",
   keywords: [
-    "Agentforce",
     "Salesforce Developer",
     "Brajesh Kumar",
-    "Field Service Lightning",
     "Agentforce",
+    "Field Service Lightning",
+    "Service Cloud",
+    "Apex",
+    "LWC",
     "Data Cloud",
   ],
   icons: {
