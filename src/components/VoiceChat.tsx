@@ -20,7 +20,6 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
   const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
   const [showPlayButton, setShowPlayButton] = useState(false);
   const [audioLevel, setAudioLevel] = useState<number>(0);
-  const [hasGreeted, setHasGreeted] = useState(false);
   const [isContinuousMode, setIsContinuousMode] = useState(false);
   const [isGreeting, setIsGreeting] = useState(false);
 
@@ -50,7 +49,10 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
       // Initialize AudioContext on user gesture to enable autoplay later
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AudioContextClass =
+          window.AudioContext ||
+          (window as unknown as Window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        audioContextRef.current = new AudioContextClass();
       }
       if (audioContextRef.current.state === 'suspended') {
         await audioContextRef.current.resume();
@@ -61,7 +63,6 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
         greetingInProgressRef.current = true;
         setIsGreeting(true);
         hasGreetedRef.current = true;
-        setHasGreeted(true);
         const greeting = "Hello! I'm Brajesh AI, the professional twin of Brajesh Kumar. May I know your name?";
         await speakText(greeting);
         setIsGreeting(false);
@@ -307,10 +308,7 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
 
   // Update audio level from analyzer (recording) or simulate (speaking)
   useEffect(() => {
-    console.log("Audio level effect triggered, isRecording:", isRecording, "isSpeaking:", isSpeaking);
-
     if (!isRecording && !isSpeaking) {
-      setAudioLevel(0);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
@@ -345,7 +343,9 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
+      setAudioLevel(0);
     };
   }, [isRecording, isSpeaking]);
 
@@ -393,53 +393,65 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
             />
           )}
 
-          {/* Astro Mascot Image */}
-          <motion.img
-            src="/astro-mascot.png"
-            alt="Agentforce Astro"
-            style={{ 
-              width: "100%", 
-              height: "100%", 
-              objectFit: "contain",
-              position: "relative",
-              zIndex: 1,
-              mixBlendMode: "multiply",
-              filter: "drop-shadow(0px 15px 25px rgba(0,0,0,0.12))"
-            }}
-            animate={
-              isLoading
-                ? {
-                    x: [0, -4, 4, -5, 5, -3, 3, 0],
-                    y: [0, 2, -2, 3, -3, 1, -1, 0],
-                    rotate: [0, -3, 3, -1, 1, 0],
-                  }
-                : isRecording
-                ? {
-                    scale: 1.15,
-                    y: -12,
-                    rotate: 4,
-                  }
-                : isSpeaking
-                ? {
-                    y: [0, -15, 0],
-                    rotate: [0, -4, 4, 0],
-                    scale: [1, 1.06, 1]
-                  }
-                : {
-                    y: [0, -10, 0],
-                    rotate: [0, 1.5, -1.5, 0]
-                  }
-            }
-            transition={
-              isLoading
-                ? { duration: 0.35, repeat: Infinity, ease: "linear" }
-                : isRecording
-                ? { type: "spring", stiffness: 200, damping: 10 }
-                : isSpeaking
-                ? { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
-                : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }
-            }
-          />
+          {/* Mascot / Avatar Image (No artificial shaking - uses natural GIF animation) */}
+          {isRecording ? (
+            <motion.img
+              key="user-listening"
+              src="/listening.gif"
+              alt="User Speaking"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              style={{ 
+                width: "100%", 
+                height: "100%", 
+                objectFit: "cover",
+                borderRadius: "50%",
+                position: "relative",
+                zIndex: 1,
+                border: "4px solid rgba(1, 118, 211, 0.6)",
+                boxShadow: "0 15px 35px rgba(1, 118, 211, 0.25)"
+              }}
+            />
+          ) : isSpeaking ? (
+            <motion.img
+              key="ai-speaking"
+              src="/speaking.gif"
+              alt="AI Replying"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              style={{ 
+                width: "100%", 
+                height: "100%", 
+                objectFit: "cover",
+                borderRadius: "50%",
+                position: "relative",
+                zIndex: 1,
+                border: "4px solid rgba(46, 132, 74, 0.6)",
+                boxShadow: "0 15px 35px rgba(46, 132, 74, 0.25)"
+              }}
+            />
+          ) : (
+            <motion.img
+              key="avatar-idle"
+              src="/idle.gif"
+              alt="Idle / Thinking"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              style={{ 
+                width: "100%", 
+                height: "100%", 
+                objectFit: "cover",
+                borderRadius: "50%",
+                position: "relative",
+                zIndex: 1,
+                border: "4px solid rgba(1, 118, 211, 0.3)",
+                boxShadow: "0 15px 35px rgba(1, 118, 211, 0.15)"
+              }}
+            />
+          )}
           
           {/* Funny Status Bubble */}
           <AnimatePresence>
@@ -466,9 +478,9 @@ export default function VoiceChat({ onClose }: VoiceChatProps) {
                   whiteSpace: "nowrap"
                 }}
               >
-                {isLoading && "Biting nails... 😬"}
+                {isLoading && "Thinking... 💭"}
                 {isRecording && "I'm all ears! 👂"}
-                {isSpeaking && "Blah blah blah 🗣️"}
+                {isSpeaking && "Speaking... 🗣️"}
               </motion.div>
             )}
           </AnimatePresence>
